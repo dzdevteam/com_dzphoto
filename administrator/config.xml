@@ -4,16 +4,51 @@
         label="COM_DZPHOTO_COMPONENT_LABEL"
         description="COM_DZPHOTO_COMPONENT_DESC"
     >
-
-        <field name="test"
-             type="radio"
-             default="1"
-             label="COM_DZPHOTO_TEST_LABEL"
-             description="COM_DZPHOTO_TEST_DESC">
-                 <option value="0">JHIDE</option>
-                 <option value="1">JSHOW</option>
-         </field>
-
+        <field type="spacer" label="COM_DZPHOTO_THUMBNAIL_SIZE" class="nav-header"/>
+        
+        <field
+            name="thumbwidth"
+            type="text" filter="int" class="validate-numeric"
+            label="COM_DZPHOTO_CONFIG_LBL_THUMB_WIDTH"
+            description="COM_DZPHOTO_CONFIG_DESC_THUMB_WIDTH"
+            default="150" />
+        <field
+            name="thumbheight"
+            type="text" filter="int" class="validate-numeric"
+            label="COM_DZPHOTO_CONFIG_LBL_THUMB_HEIGHT"
+            description="COM_DZPHOTO_CONFIG_DESC_THUMB_HEIGHT"
+            default="150" />
+            
+        <field type="spacer" label="COM_DZPHOTO_MEDIUM_SIZE" class="nav-header"/>
+        
+        <field
+            name="mediumwidth"
+            type="text" filter="int" class="validate-numeric"
+            label="COM_DZPHOTO_CONFIG_LBL_MEDIUM_WIDTH"
+            description="COM_DZPHOTO_CONFIG_DESC_MEDIUM_WIDTH"
+            default="300" />
+        <field
+            name="mediumheight"
+            type="text" filter="int" class="validate-numeric"
+            label="COM_DZPHOTO_CONFIG_LBL_MEDIUM_HEIGHT"
+            description="COM_DZPHOTO_CONFIG_DESC_MEDIUM_HEIGHT"
+            default="300" />
+                
+        <field type="spacer" label="COM_DZPHOTO_LARGE_SIZE" class="nav-header"/>
+        
+        <field
+            name="largewidth"
+            type="text" filter="int" class="validate-numeric"
+            label="COM_DZPHOTO_CONFIG_LBL_LARGE_WIDTH"
+            description="COM_DZPHOTO_CONFIG_DESC_LARGE_WIDTH"
+            default="1000" />
+        <field
+            name="largeheight"
+            type="text" filter="int" class="validate-numeric"
+            label="COM_DZPHOTO_CONFIG_LBL_LARGE_HEIGHT"
+            description="COM_DZPHOTO_CONFIG_DESC_LARGE_HEIGHT"
+            default="1000" />
+            
     </fieldset>
 
     <fieldset name="permissions"
