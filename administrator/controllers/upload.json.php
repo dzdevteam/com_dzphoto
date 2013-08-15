@@ -74,21 +74,4 @@ class DZPhotoControllerUpload extends JControllerLegacy
         
         jexit(); // Close application
     }
-    
-    /**
-     * Attach dimension information into current image name
-     * @param string $name
-     * @param int $width
-     * @param int $height
-     *
-     * @return string $newName
-     */
-    private function _attachDimension($name, $width, $height)
-    {
-        // Get file extension and name
-        $info = pathinfo($name);
-        $filename = basename($name, '.'.$info['extension']);
-        
-        return $filename.'_'.$width.'x'.$height.'.'.$info['extension'];
-    }
 }
