@@ -26,7 +26,10 @@ class DZPhotoControllerUpload extends JControllerLegacy
 
     public function upload() {
         header('Content-Type: application/json');
-        if (!empty($_FILES)) {
+        JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
+        
+        $file = $this->input->files->get('file', '', 'array');
+        if (!empty($file)) {
             $app = JFactory::getApplication();        
             $params = JComponentHelper::getParams('com_dzphoto');
             
@@ -50,8 +53,8 @@ class DZPhotoControllerUpload extends JControllerLegacy
             }
             
             // Prepare file names
-            $tmpfile = $_FILES['file']['tmp_name'];            
-            $name = JFile::makeSafe(sprintf('%u', crc32($_FILES['file']['name'].time())).'-'.$_FILES['file']['name']);
+            $tmpfile = $file['tmp_name'];            
+            $name = JFile::makeSafe(sprintf('%u', crc32($file['name'].time())).'-'.$file['name']);
             $targetfile = $dest.'/'.$name;
             
             // Now upload the image

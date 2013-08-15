@@ -9,6 +9,8 @@
 // no direct access
 defined('_JEXEC') or die;
 
+JHtml::_('jquery.framework');
+
 // Import CSS
 $document = JFactory::getDocument();
 $document->addStyleSheet('components/com_dzphoto/assets/css/dzphoto.css');
@@ -30,5 +32,11 @@ $document->addScript('components/com_dzphoto/assets/js/dzphoto.js');
             <input type="file" name="file" accept="image/*" />
             <input type="submit" class="btn" value="<?php echo JText::_('JSUBMIT'); ?>" />
         </div>
+        <?php echo JHtml::_( 'form.token' ); ?>
     </form>
+    <div class="row" id="clearzone" style="display:none;">
+        <div class="span12 text-center">
+            <button class="btn btn-danger"><?php echo JText::_('COM_DZFOODMENU_CLEAR_ALL'); ?></button>
+        </div>
+    </div>
 </div>
