@@ -46,9 +46,7 @@ class DZPhotoControllerUpload extends JControllerLegacy
             if (!JFolder::exists($dest)) {
                 $result = JFolder::create($dest);
                 if (!$result) {                    
-                    echo JText::_('COM_DZPHOTO_ERROR_CREATE_DIRECTORY'); 
-                    header($_SERVER['SERVER_PROTOCOL'] . ' ' . JText::_('COM_DZPHOTO_ERROR_CREATE_DIRECTORY'), true, 500);
-                    jexit();                    
+                    DZPhotoHelper::exitWithError(JText::_('COM_DZPHOTO_ERROR_CREATE_DIRECTORY'), 500); 
                 }
             }
             
@@ -60,15 +58,17 @@ class DZPhotoControllerUpload extends JControllerLegacy
             // Now upload the image
             $result = JFile::upload($tmpfile, $targetfile);
             if (!$result) {
-                echo JText::_('COM_DZPHOTO_ERROR_MOVE_FILE');
-                header($_SERVER['SERVER_PROTOCOL'] . ' ' . JText::_('COM_DZPHOTO_ERROR_MOVE_FILE'), true, 500);
-                jexit();
+                DZPhotoHelper::exitWithError(JText::_('COM_DZPHOTO_ERROR_MOVE_FILE'), 500);
             }
             
             // Now we create different sizes for this image
             $links = DZPhotoHelper::generateThumbs($targetfile);
             $links['original'] = $basedir.'/'.$year.'/'.$month.'/'.$name;
             
+            // Create a new item in database to represent the image
+            DZPhotoHelper::createImageItem($links);
+            
+            // Return JSON object containing the links
             echo json_encode($links);
         }
         

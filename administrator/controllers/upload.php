@@ -62,6 +62,9 @@ class DZPhotoControllerUpload extends JControllerLegacy
             // Now we create different sizes for this image
             $links = DZPhotoHelper::generateThumbs($targetfile);
             
+            // Create a new item in database to represent the image
+            DZPhotoHelper::createImageItem($links);
+            
             // Announce successfully uploaded files
             $this->setMessage(JText::_('COM_DZPHOTO_UPLOAD_SUCCESS'));
         }

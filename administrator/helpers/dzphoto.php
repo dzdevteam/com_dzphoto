@@ -13,7 +13,7 @@ defined('_JEXEC') or die;
 /**
  * Dzphoto helper.
  */
-class DzphotoHelper
+class DZPhotoHelper
 {
     /**
      * Configure the Linkbar.
@@ -88,5 +88,87 @@ class DzphotoHelper
         $links['large'] = $basepath. '/' . pathinfo($other_thumbs[1]->getPath(), PATHINFO_BASENAME);
         
         return $links;
+    }
+    
+    /**
+     * Create a new item in database to represent a image
+     *
+     * @param array $links Contain 4 links (thumb, medium, large, original) to the image
+     *
+     * @return void
+     */
+    public static function createImageItem($links)
+    {
+        // We need at least the link to original image
+        if ( !(is_array($links) && array_key_exists('original', $links)) ) {
+            throw new Exception(JText::_('COM_DZPHOTO_INVALID_LINKS_ARRAY'), 500);
+        }
+        
+        // Prepare necessary model and table
+        $model = JModelLegacy::getInstance('Image', 'DZPhotoModel');
+        $table = $model->getTable();
+        $data = array(
+            'id' => 0,
+            'title' => pathinfo($links['original'], PATHINFO_BASENAME),
+            'links' => $links
+        );
+        
+        $user = JFactory::getUser();
+        if (!$user->authorise('core.create', 'com_dzphoto.image')) {
+            DZPhotoHelper::exitWithError(JText::_('JLIB_APPLICATION_ERROR_SAVE_NOT_PERMITTED'), 500);
+        }
+        
+        $form = $model->getForm($data, false);
+        if (!$form) {
+            DZPhotoHelper::exitWithError($model->getError(), 500);
+        };
+        
+        $validData = $model->validate($form, $data);
+        if ($validData === false) {
+            // Get the validation messages.
+            $errors = $model->getErrors();
+            $messages = array();
+            
+            // Push up to three validation messages out to the user.
+            for ($i = 0, $n = count($errors); $i < $n && $i < 3; $i++)
+            {
+                if ($errors[$i] instanceof Exception)
+                {
+                    $messages[] = $errors[$i]->getMessage();
+                }
+                else
+                {
+                    $messages[] = $errors[$i];
+                }
+            }
+            
+            DZPhotoHelper::exitWithError(join(',', $messages), 500);
+        }
+        
+        if (!isset($validData['tags']))
+        {
+            $validData['tags'] = null;
+        }
+        
+        // Attempt to save data
+        if (!$model->save($validData))
+        {
+            DZPhotoHelper::exitWithError(JText::sprintf('JLIB_APPLICATION_ERROR_SAVE_FAILED', $model->getError()), 500);
+        }
+    }
+    
+    /**
+     * Return error and response code then exit application
+     *
+     * @param string $error Error message
+     * @param int $status_code HTTP status code
+     *
+     * @return void
+     */
+    public static function exitWithError($error, $status_code = 500)
+    {
+        echo $error;
+        header($_SERVER['SERVER_PROTOCOL'] . " $status_code " . $error, true, $status_code);
+        jexit();
     }
 }
