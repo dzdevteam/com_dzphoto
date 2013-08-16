@@ -17,8 +17,7 @@
 
         <field name="title" type="text"
             label="COM_DZPHOTO_FORM_LBL_IMAGE_TITLE"
-            description="COM_DZPHOTO_FORM_DESC_IMAGE_TITLE" 
-            required="true" 
+            description="COM_DZPHOTO_FORM_DESC_IMAGE_TITLE"
             filter="string" /> 
 
         <field name="alias" type="text"

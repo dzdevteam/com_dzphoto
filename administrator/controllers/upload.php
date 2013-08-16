@@ -63,7 +63,13 @@ class DZPhotoControllerUpload extends JControllerLegacy
             $links = DZPhotoHelper::generateThumbs($targetfile);
             
             // Create a new item in database to represent the image
-            DZPhotoHelper::createImageItem($links);
+            DZPhotoHelper::updateImageItem(
+                array(
+                    'id' => 0, 
+                    'title' => pathinfo($links['original'], PATHINFO_BASENAME),
+                    'links' => $links
+                )
+            );
             
             // Announce successfully uploaded files
             $this->setMessage(JText::_('COM_DZPHOTO_UPLOAD_SUCCESS'));

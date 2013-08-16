@@ -151,6 +151,11 @@ class DzphotoModelimages extends JModelList {
     public function getItems() {
         $items = parent::getItems();
         
+        foreach ($items as &$item) {
+            $registry = new JRegistry();
+            $registry->loadString($item->links);
+            $item->links = $registry->toArray();
+        }
         return $items;
     }
 

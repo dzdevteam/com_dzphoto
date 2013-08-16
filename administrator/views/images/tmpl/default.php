@@ -12,12 +12,14 @@ defined('_JEXEC') or die;
 
 JHtml::addIncludePath(JPATH_COMPONENT.'/helpers/html');
 JHtml::_('bootstrap.tooltip');
+JHtml::_('bootstrap.modal');
 JHtml::_('behavior.multiselect');
 JHtml::_('formbehavior.chosen', 'select');
 
 // Import CSS
 $document = JFactory::getDocument();
 $document->addStyleSheet('components/com_dzphoto/assets/css/dzphoto.css');
+$document->addScript('components/com_dzphoto/assets/js/dzphoto.js');
 
 $user   = JFactory::getUser();
 $userId = $user->get('id');
@@ -109,18 +111,22 @@ if (!empty($this->extra_sidebar)) {
                         <?php echo JHtml::_('grid.sort', 'JSTATUS', 'a.state', $listDirn, $listOrder); ?>
                     </th>
                 <?php endif; ?>
+                <th class='left' width="20%">
+                <?php echo JHtml::_('grid.sort',  'COM_DZPHOTO_IMAGES_TITLE', 'a.title', $listDirn, $listOrder); ?>
+                </th>
+                <th class='left' width="20%">
+                <?php echo JText::_('COM_DZPHOTO_IMAGES_CAPTION'); ?>
+                </th>
+                <th class='center' width="15%">
+                <?php echo JText::_('COM_DZPHOTO_IMAGES_PREVIEW'); ?>
+                </th>
+                <th class='center'>
+                <?php echo JText::_('COM_DZPHOTO_IMAGES_LINK'); ?>
+                </th>
                     
                 <th class='left'>
-                <?php echo JHtml::_('grid.sort',  'COM_DZPHOTO_IMAGES_CREATED_BY', 'a.created_by', $listDirn, $listOrder); ?>
+                    <?php echo JHtml::_('grid.sort',  'COM_DZPHOTO_IMAGES_CREATED_BY', 'a.created_by', $listDirn, $listOrder); ?>
                 </th>
-                <th class='left'>
-                <?php echo JHtml::_('grid.sort',  'COM_DZPHOTO_IMAGES_CAPTION', 'a.caption', $listDirn, $listOrder); ?>
-                </th>
-                <th class='left'>
-                <?php echo JHtml::_('grid.sort',  'COM_DZPHOTO_IMAGES_LINK', 'a.link', $listDirn, $listOrder); ?>
-                </th>
-                    
-                    
                 <?php if (isset($this->items[0]->id)): ?>
                     <th width="1%" class="nowrap center hidden-phone">
                         <?php echo JHtml::_('grid.sort', 'JGRID_HEADING_ID', 'a.id', $listDirn, $listOrder); ?>
@@ -151,7 +157,7 @@ if (!empty($this->extra_sidebar)) {
                 $canCheckin = $user->authorise('core.manage',       'com_dzphoto');
                 $canChange  = $user->authorise('core.edit.state',   'com_dzphoto');
                 ?>
-                <tr class="row<?php echo $i % 2; ?>">
+                <tr class="row<?php echo $i % 2; ?>" data-id="<?php echo $item->id; ?>">
                     
                 <?php if (isset($this->items[0]->ordering)): ?>
                     <td class="order nowrap center hidden-phone">
@@ -181,21 +187,35 @@ if (!empty($this->extra_sidebar)) {
                         <?php echo JHtml::_('jgrid.published', $item->state, $i, 'images.', $canChange, 'cb'); ?>
                     </td>
                 <?php endif; ?>
-                    
-                <td>
-
-                    <?php echo $item->created_by; ?>
+                <td contenteditable="true" tabindex="1" data-field="title" data-id="<?php echo $item->id; ?>">
+                    <?php echo $item->title; ?>
                 </td>
-                <td>
-
+                <td contenteditable="true" tabindex="1" data-field="caption" data-id="<?php echo $item->id; ?>">
                     <?php echo $item->caption; ?>
                 </td>
                 <td>
-
-                    <?php echo $item->link; ?>
+                    <a href="<?php echo JUri::root().$item->links['large']; ?>" title="<?php echo JText::_('COM_DZPHOTO_IMAGES_LARGE_SIZE'); ?>" class="img-modal">
+                        <img src="<?php echo JUri::root().$item->links['thumb']; ?>" title="<?php echo $item->title; ?>" alt="<?php echo $item->title; ?>" />
+                    </a>
+                </td>
+                <td class="center">
+                    <a href="<?php echo JURI::root().$item->links['original']; ?>" target="_nblank" class="btn btn-link">
+                        <?php echo JText::_('COM_DZPHOTO_IMAGES_LINK_ORIGINAL'); ?>&nbsp;<span class="icon-out-2" aria-hidden="true"></span>
+                    </a><br />
+                    <a href="<?php echo JURI::root().$item->links['thumb']; ?>" target="_nblank" class="btn btn-link">
+                        <?php echo JText::_('COM_DZPHOTO_IMAGES_LINK_THUMB'); ?>&nbsp;<span class="icon-out-2" aria-hidden="true"></span>
+                    </a><br />
+                    <a href="<?php echo JURI::root().$item->links['medium']; ?>" target="_nblank" class="btn btn-link">
+                        <?php echo JText::_('COM_DZPHOTO_IMAGES_LINK_MEDIUM'); ?>&nbsp;<span class="icon-out-2" aria-hidden="true"></span>
+                    </a><br />
+                    <a href="<?php echo JURI::root().$item->links['large']; ?>" target="_nblank" class="btn btn-link">
+                        <?php echo JText::_('COM_DZPHOTO_IMAGES_LINK_LARGE'); ?>&nbsp;<span class="icon-out-2" aria-hidden="true"></span>
+                    </a>
                 </td>
 
-
+                <td>
+                    <?php echo $item->created_by; ?>
+                </td>
                 <?php if (isset($this->items[0]->id)): ?>
                     <td class="center hidden-phone">
                         <?php echo (int) $item->id; ?>
@@ -213,5 +233,16 @@ if (!empty($this->extra_sidebar)) {
         <?php echo JHtml::_('form.token'); ?>
     </div>
 </form>        
-
+<div id="item-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-body">
+    </div>
+    <div class="modal-footer">
+        <button class="btn close-btn" data-dismiss="modal" aria-hidden="true">
+            <span class="icon-cancel small" aria-hidden="true"></span>&nbsp;<?php echo JText::_('JTOOLBAR_CLOSE'); ?>
+        </button>
+        <button class="btn btn-primary submit-btn">
+            <?php echo JText::_('JSUBMIT'); ?>
+        </button>
+    </div>
+</div>
         

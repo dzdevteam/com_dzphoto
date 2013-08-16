@@ -7,3 +7,21 @@
       background-image: url(../images/l_images.png);
       padding-left:60px!important;
 }
+
+td[contenteditable]:focus {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(82,168,236,0.8);
+    outline: 0;
+    outline: thin dotted \9;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+    -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+    transition: border linear .2s, box-shadow linear .2s;
+    padding-left: 7px;
+}
+
+#alert-area .alert {
+    margin-bottom: 0px;
+    padding: 2px 25px 2px 14px;
+    font-size: 12px;
+}

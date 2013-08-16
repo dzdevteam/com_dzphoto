@@ -11,6 +11,7 @@
 defined('_JEXEC') or die;
 
 jimport('joomla.application.component.controlleradmin');
+require_once JPATH_COMPONENT_ADMINISTRATOR.'/helpers/dzphoto.php';
 
 /**
  * Images list controller class.
@@ -61,6 +62,22 @@ class DzphotoControllerImages extends JControllerAdmin
         JFactory::getApplication()->close();
     }
     
-    
-    
+    /**
+     * Method to save the image title and caption through ajax
+     *
+     * @return void
+     */
+    public function saveImageAjax()
+    {
+        header('Content-Type: application/json');
+        JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
+        
+        // Get the input
+        $input = JFactory::getApplication()->input;
+        $data = $input->post->get('jform', array(), 'array');
+        
+        DZPhotoHelper::updateImageItem($data);
+        echo json_encode(array('message' => JText::_('COM_DZPHOTO_SAVE_SUCCESS')));
+        JFactory::getApplication()->close();
+    }
 }

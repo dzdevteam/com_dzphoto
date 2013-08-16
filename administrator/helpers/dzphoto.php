@@ -93,25 +93,14 @@ class DZPhotoHelper
     /**
      * Create a new item in database to represent a image
      *
-     * @param array $links Contain 4 links (thumb, medium, large, original) to the image
+     * @param array $data Contain image data (id, title, caption, links)
      *
      * @return void
      */
-    public static function createImageItem($links)
-    {
-        // We need at least the link to original image
-        if ( !(is_array($links) && array_key_exists('original', $links)) ) {
-            throw new Exception(JText::_('COM_DZPHOTO_INVALID_LINKS_ARRAY'), 500);
-        }
-        
-        // Prepare necessary model and table
+    public static function updateImageItem($data)
+    {        
+        // Prepare model and data
         $model = JModelLegacy::getInstance('Image', 'DZPhotoModel');
-        $table = $model->getTable();
-        $data = array(
-            'id' => 0,
-            'title' => pathinfo($links['original'], PATHINFO_BASENAME),
-            'links' => $links
-        );
         
         $user = JFactory::getUser();
         if (!$user->authorise('core.create', 'com_dzphoto.image')) {
@@ -167,8 +156,9 @@ class DZPhotoHelper
      */
     public static function exitWithError($error, $status_code = 500)
     {
-        echo $error;
         header($_SERVER['SERVER_PROTOCOL'] . " $status_code " . $error, true, $status_code);
+        header('Content-Type: application/json');
+        echo json_encode(array('message' => $error));
         jexit();
     }
 }

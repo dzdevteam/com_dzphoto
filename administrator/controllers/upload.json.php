@@ -66,7 +66,13 @@ class DZPhotoControllerUpload extends JControllerLegacy
             $links['original'] = $basedir.'/'.$year.'/'.$month.'/'.$name;
             
             // Create a new item in database to represent the image
-            DZPhotoHelper::createImageItem($links);
+            DZPhotoHelper::updateImageItem(
+                array(
+                    'id' => 0, 
+                    'title' => pathinfo($links['original'], PATHINFO_BASENAME),
+                    'links' => $links
+                )
+            );
             
             // Return JSON object containing the links
             echo json_encode($links);
