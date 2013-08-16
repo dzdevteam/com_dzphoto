@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `#__dzphoto_images` (
 `title` VARCHAR(255)  NOT NULL ,
 `alias` VARCHAR(255)  NOT NULL ,
 `caption` TEXT NOT NULL ,
-`link` VARCHAR(255)  NOT NULL ,
+`links` TEXT  NOT NULL ,
 `params` TEXT NOT NULL,
 PRIMARY KEY (`id`)
 ) DEFAULT COLLATE=utf8_general_ci;
@@ -23,3 +23,4 @@ CREATE TABLE IF NOT EXISTS `#__dzphoto_relations` (
 PRIMARY KEY (`catid`, `imageid`)
 ) DEFAULT COLLATE=utf8_general_ci;
 
+INSERT INTO `#__content_types` (`type_id`, `type_title`, `type_alias`, `table`, `rules`, `field_mappings`, `router`) VALUES (NULL, 'DZ Photo Image', 'com_dzphoto.image', '{"special":{"dbtable":"#__dzphoto_images","key":"id","type":"Image","prefix":"DZPhotoTable","config":"array()"}}', '', '{"common":[{"core_content_item_id":"id","core_title":"title","core_state":"state","core_alias":"alias","core_body":"caption", "core_params":"params", "core_ordering":"ordering", "asset_id":"asset_id"}]}', 'DZPhotoHelperRoute::getImageRoute');

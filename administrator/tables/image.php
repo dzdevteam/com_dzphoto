@@ -22,6 +22,9 @@ class DzphotoTableimage extends JTable {
      */
     public function __construct(&$db) {
         parent::__construct('#__dzphoto_images', 'id', $db);
+        
+        JTableObserverTags::createObserver($this, array('typeAlias' => 'com_dzphoto.image'));
+        JObserverMapper::addObserverClassToClass('JTableObserverTags', 'DZPhotoTableImage', array('typeAlias' => 'com_dzphoto.image'));
     }
 
     /**
@@ -52,6 +55,13 @@ class DzphotoTableimage extends JTable {
             $registry->loadArray($array['metadata']);
             $array['metadata'] = (string) $registry;
         }
+        
+        if (isset($array['links']) && is_array($array['links'])) {
+            $registry = new JRegistry();
+            $registry->loadArray($array['links']);
+            $array['links'] = (string) $registry;
+        }
+        
         if(!JFactory::getUser()->authorise('core.admin', 'com_dzphoto.image.'.$array['id'])){
             $actions = JFactory::getACL()->getActions('com_dzphoto','image');
             $default_actions = JFactory::getACL()->getAssetRules('com_dzphoto.image.'.$array['id'])->getData();
@@ -94,10 +104,62 @@ class DzphotoTableimage extends JTable {
         if (property_exists($this, 'ordering') && $this->id == 0) {
             $this->ordering = self::getNextOrder();
         }
+        // Check for unique alias
+        // Checking valid title and alias
+        if (trim($this->title) == '')
+        {
+            $this->setError(JText::_('COM_DZPHOTO_WARNING_PROVIDE_VALID_NAME'));
+            return false;
+        }
 
+        if (trim($this->alias) == '')
+        {
+            $this->alias = $this->title;
+        }
+
+        $this->alias = $this->_stringURLSafe($this->alias);
+
+        if (trim(str_replace('-', '', $this->alias)) == '')
+        {
+            $this->alias = JFactory::getDate()->format('Y-m-d-H-i-s');
+        }
+
+        // Verify that the alias is unique
+        $table = JTable::getInstance('Image', 'DZPhotoTable');
+        if ($table->load(array('alias' => $this->alias)) && ($table->id != $this->id || $this->id == 0))
+        {
+            $this->setError(JText::_('COM_DZPHOTO_ERROR_UNIQUE_ALIAS'));
+            return false;
+        }
         return parent::check();
     }
 
+    /**
+     * Overrides JTable::store to set created time and user id
+     *
+     * @param   boolean  $updateNulls  True to update fields even if they are null.
+     *
+     * @return  boolean  True on success.
+     */
+    public function store($updateNulls = false)
+    {
+        $date = JFactory::getDate();
+        $user = JFactory::getUser();
+        
+        if (!$this->id) {
+            // Newly created item
+            if (!(int) $this->created) {
+                $this->created = $date->toSql();
+            }
+
+            if (empty($this->created_by)) {
+                $this->created_by = $user->get('id');
+            }
+        }
+        
+        return parent::store($updateNulls);
+    }
+    
     /**
      * Method to set the publishing state for a row or list of rows in the database
      * table.  The method respects checked out rows by other users and will attempt
@@ -203,6 +265,17 @@ class DzphotoTableimage extends JTable {
         return $assetParentId;
     }
     
-    
+    /**
+     * Convert string into URL safe one
+     */
+    protected function _stringURLSafe($url) {
+        setlocale(LC_ALL, 'en_US.UTF8');
+        $clean = iconv('UTF-8', 'ASCII//TRANSLIT', $url);
+        $clean = preg_replace("/[^a-zA-Z0-9\/_| -]/", '', $clean);
+        $clean = strtolower(trim($clean, '-'));
+        $clean = preg_replace("/[\/_| -]+/", '-', $clean);
+
+        return $clean;
+    }
 
 }

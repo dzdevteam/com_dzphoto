@@ -92,7 +92,11 @@ class DzphotoModelimage extends JModelAdmin
         if ($item = parent::getItem($pk)) {
 
             //Do any procesing on fields here if needed
-
+            if (!empty($item->id))
+            {
+                $item->tags = new JHelperTags;
+                $item->tags->getTagIds($item->id, 'com_dzphoto.image');
+            }
         }
 
         return $item;

@@ -2,83 +2,100 @@
 <form>
     <fieldset>
 
-              <field name="id" type="text" default="0" label="COM_DZPHOTO_FORM_LBL_IMAGE_ID"
+        <field name="id" type="text" default="0" label="COM_DZPHOTO_FORM_LBL_IMAGE_ID"
             readonly="true" class="readonly"
             description="JGLOBAL_FIELD_ID_DESC" /> 
-
-       <field name="created_by" type="createdby" default="" 
+        
+        <field name="created" type="calendar" readonly="true"
+            label="COM_DZPHOTO_FORM_LBL_IMAGE_CREATED"
+            description="COM_DZPHOTO_FORM_DESC_IMAGE_CREATED"
+            format="%Y-%m-%d %H:%M:%S" filter="user_utc" />
+            
+        <field name="created_by" type="createdby" default="" 
             label="COM_DZPHOTO_FORM_LBL_IMAGE_CREATED_BY"
             description="COM_DZPHOTO_FORM_DESC_IMAGE_CREATED_BY"  /> 
 
-       <field name="title" type="text"
-                
+        <field name="title" type="text"
             label="COM_DZPHOTO_FORM_LBL_IMAGE_TITLE"
             description="COM_DZPHOTO_FORM_DESC_IMAGE_TITLE" 
-                
-                
-                 required="true" 
+            required="true" 
             filter="string" /> 
 
-       <field name="alias" type="text"
-                
+        <field name="alias" type="text"
             label="COM_DZPHOTO_FORM_LBL_IMAGE_ALIAS"
             description="COM_DZPHOTO_FORM_DESC_IMAGE_ALIAS" 
-                
-                
-                
             filter="string" /> 
 
-       <field name="caption" type="textarea"
-                
+        <field name="caption" type="textarea"
             label="COM_DZPHOTO_FORM_LBL_IMAGE_CAPTION"
             description="COM_DZPHOTO_FORM_DESC_IMAGE_CAPTION" 
-                
-                
-                
             cols="150"
             rows="5"
             filter="safehtml" /> 
 
-       <field name="link" type="text"
-                
-            label="COM_DZPHOTO_FORM_LBL_IMAGE_LINK"
-            description="COM_DZPHOTO_FORM_DESC_IMAGE_LINK" 
-                
-                
-                
-            readonly="true"
-            filter="path" /> 
+        <fields name="links"> 
+            <field
+                name="thumb"
+                type="text" readonly="true"
+                label="COM_DZPHOTO_FORM_LBL_IMAGE_LINKS_THUMBNAIL"
+                description="COM_DZPHOTO_FORM_DESC_IMAGE_LINKS_THUMBNAIL"
+                filter="path" />
+            <field
+                name="medium"
+                type="text" readonly="true"
+                label="COM_DZPHOTO_FORM_LBL_IMAGE_LINKS_MEDIUM"
+                description="COM_DZPHOTO_FORM_DESC_IMAGE_LINKS_MEDIUM"
+                filter="path" />
+            <field
+                name="large"
+                type="text" readonly="true"
+                label="COM_DZPHOTO_FORM_LBL_IMAGE_LINKS_LARGE"
+                description="COM_DZPHOTO_FORM_DESC_IMAGE_LINKS_LARGE"
+                filter="path" />
+            <field
+                name="original"
+                type="text" readonly="true"
+                label="COM_DZPHOTO_FORM_LBL_IMAGE_LINKS_ORIGINAL"
+                description="COM_DZPHOTO_FORM_DESC_IMAGE_LINKS_ORIGINAL"
+                filter="path" />
+        </fields>
+        
+        <field
+            name="tags" type="tag"
+            label="COM_DZPHOTO_FORM_LBL_IMAGE_TAGS"
+            description="COM_DZPHOTO_FORM_DESC_IMAGE_TAGS"
+            multiple="true" />
+            
+        <field
+            name="state"
+            type="list"
+            label="JSTATUS"
+            description="JFIELD_PUBLISHED_DESC"
+            class="inputbox"
+            size="1"
+            default="1">
+            <option value="1">JPUBLISHED</option>
+            <option value="0">JUNPUBLISHED</option>
+        </field> 
 
-         <field
-        name="state"
-        type="list"
-        label="JSTATUS"
-        description="JFIELD_PUBLISHED_DESC"
-        class="inputbox"
-        size="1"
-        default="1">
-        <option value="1">JPUBLISHED</option>
-        <option value="0">JUNPUBLISHED</option>
-    </field> 
-
-                        <field name="checked_out" type="hidden" filter="unset" />
+        <field name="checked_out" type="hidden" filter="unset" />
         <field name="checked_out_time" type="hidden" filter="unset" /> 
 
- </fieldset> 
+    </fieldset> 
 
- <fieldset 
-                        name="accesscontrol">
-                       <field name="asset_id" type="hidden" filter="unset" />
-                       <field name="rules"
-                            type="rules"
-                            label="JFIELD_RULES_LABEL"
-                            translate_label="false"
-                            filter="rules"
-                            validate="rules"
-                            class="inputbox"
-                            component="com_dzphoto"
-                            section="image"
-                        />
+    <fieldset 
+        name="accesscontrol">
+        <field name="asset_id" type="hidden" filter="unset" />
+        <field name="rules"
+            type="rules"
+            label="JFIELD_RULES_LABEL"
+            translate_label="false"
+            filter="rules"
+            validate="rules"
+            class="inputbox"
+            component="com_dzphoto"
+            section="image"
+        />
 
     </fieldset>
 
