@@ -61,7 +61,7 @@ jQuery(document).ready(function(){
         data.jform.id = id;
         data.jform[field] = value;
         data[token] = 1;
-        jQuery('.alert').alert('close');
+        jQuery('#alert-area').html('<img src="../media/system/images/modal/spinner.gif" />');
         // Alert template
         $alert_tpl = jQuery('<div class="alert fade in"><a class="close" data-dismiss="alert" href="#">&times;</a></div>');
         // Send data
