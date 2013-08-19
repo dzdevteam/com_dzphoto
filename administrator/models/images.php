@@ -155,6 +155,9 @@ class DzphotoModelimages extends JModelList {
             $registry = new JRegistry();
             $registry->loadString($item->links);
             $item->links = $registry->toArray();
+            
+            $item->tags = new JHelperTags;
+            $item->tags->getItemTags('com_dzphoto.image', $item->id);
         }
         return $items;
     }

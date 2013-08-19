@@ -22,28 +22,35 @@ if (typeof Dropzone !== 'undefined') {
         }
     }
 }
-jQuery(document).ready(function(){
+jQuery(document).ready(function() {
+    // Utility function to display alert message
+    var displayAlert = function (message, alertClass) {
+        // Prepare the alert message
+        var $alert_tpl = jQuery('<div class="alert fade in"><a class="close" data-dismiss="alert" href="#">&times;</a></div>');
+        if (typeof alertClass !== 'undefined')
+            $alert_tpl.addClass(alertClass);
+        $alert_tpl.append('<b>' + message + '</b>');
+        
+        // Display the alert
+        jQuery('#alert-area').html($alert_tpl);
+    }
+    
+    // Add the clear dropzone button functionality
     jQuery('#clearzone button').on('click', function(){
         Dropzone.forElement("#adminForm").removeAllFiles();
     });
-    jQuery("a.img-modal").on('click', function() {
-        var $img = jQuery("<img src='" + jQuery(this).attr('href') + "' />");
-        jQuery("#item-modal > div.modal-body").html($img);
-        jQuery("#item-modal button.submit-btn").hide();
-        jQuery("#item-modal").modal('show');
-        
-        return false;
-    });
-    jQuery('#toolbar').append('<div class="btn-wrapper pull-right"><div id="alert-area"></div></div>');
-    jQuery("#imageList td[contenteditable]").on('focus', function() {
+    
+    // Allow editing images' title and caption right on list view
+    var td_focus_handler = function() {
         // Store current data
         jQuery(this).data('before', jQuery(this).text().trim());
-    }).on('keypress', function(event) {
+    }, td_keypress_handler = function(event) {
+        // Prevent newline on title or caption
         if (event.keyCode == 13) {
             jQuery(this).blur();
             return false;
         }
-    }).on('blur', function(event) {
+    }, td_blur_handler = function(event) {
         // Do not proceed if data hasn't been changed
         if (jQuery(this).data('before') == jQuery(this).text().trim())
             return jQuery(this);
@@ -54,27 +61,118 @@ jQuery(document).ready(function(){
             field = jQuery(this).data('field'),
             value = jQuery(this).text().trim(),
             token = jQuery('input[type="hidden"][value="1"]').attr('name');
-        
+            
         // Prepare data
         data = new Object();
         data.jform = new Object();
         data.jform.id = id;
         data.jform[field] = value;
         data[token] = 1;
+        
+        // Loading animation
         jQuery('#alert-area').html('<img src="../media/system/images/modal/spinner.gif" />');
-        // Alert template
-        $alert_tpl = jQuery('<div class="alert fade in"><a class="close" data-dismiss="alert" href="#">&times;</a></div>');
+        
         // Send data
         jQuery.ajax({
             url: 'index.php?option=com_dzphoto&task=images.saveImageAjax',
             type: 'POST',
             data: data
-        }).done(function(msg) {
-            $success = $alert_tpl.clone().addClass('alert-success').append('<b>'+msg.message+'</b>');
-            jQuery('#alert-area').html($success);
-        }).fail(function(jqXHR, error) {
-            $error = $alert_tpl.clone().addClass('alert-danger').append('<b>'+error.message+'</b>');
-            jQuery('#alert-area').html($error);
+        }).done(function(response) {
+            displayAlert(response.message, 'alert-success');
+        }).error(function(jqXHR, textStatus, errorThrown) {
+            displayAlert(errorThrown, 'alert-danger');
         });
-    });
+    };
+    
+    jQuery("#imageList td[contenteditable]")
+        .on('focus', td_focus_handler)
+        .on('keypress', td_keypress_handler)
+        .on('blur', td_blur_handler);
+    
+    // Utilize bootstrap modal to preview images
+    var img_modal_handler = function() {
+        var $img = jQuery("<img src='" + jQuery(this).attr('href') + "' />"),
+            $modal = jQuery("#item-modal");
+        jQuery("div.modal-header", $modal).hide();
+        jQuery("div.modal-body", $modal).html($img);
+        jQuery("button.submit-btn", $modal).hide();
+        $modal.modal('show');
+        
+        return false;
+    };
+    jQuery("a.img-modal").on('click', img_modal_handler);
+    
+    // Utilize bootstrap modal to edit tags for item
+    var tags_modal_handler = function() {
+        // Generate a select
+        var $tags_container = jQuery('#hidden-area > div.tags-container'),
+            $select = jQuery("select#jform_tags"),
+            $modal = jQuery('#item-modal'),
+            options = jQuery(this).data('item-tags'),
+            a = this,
+            $option, tag_id;
+            
+        // Prepare the form
+        // -- prepare item id
+        jQuery("input#jform_id").val(jQuery(this).data('item-id'));
+        // -- clear current tag options
+        $select.html('');
+        // -- prepare the tag options
+        if (options !== null) {
+            for (var tag_id in options) {
+                $option = jQuery('<option />');
+                $option.text(options[tag_id]).val(tag_id).attr('selected', 'selected');
+                $select.append($option);
+            }
+        }
+        $select.trigger('liszt:updated');
+        
+        // Show the modal
+        jQuery("div.modal-header", $modal).html('<h3>'+jQuery(this).data('item-title')+'</h3>').show();
+        jQuery("div.modal-body", $modal).html($tags_container).css({"min-height": "150px"});
+        
+        // Bind submit button to send form through ajax
+        jQuery("button.submit-btn", $modal).show().on('click', function() {
+            // Loading animation
+            jQuery('#alert-area').html('<img src="../media/system/images/modal/spinner.gif" />');
+            
+            // Submit data
+            jQuery.ajax({
+                type: 'POST',
+                url: jQuery("form#tags_form").attr('action'),
+                        data: jQuery("form#tags_form").serialize(),
+                        success: function(response) {
+                            // Update current row
+                            var item_id = jQuery(a).data('item-id');
+                            jQuery("tr#row-item-" + item_id).load('index.php?option=com_dzphoto&view=images #row-item-' + item_id + ' > * ', null, function() {
+                                displayAlert(response.message, 'alert-success');
+                                
+                                // Rebind event for newly fetched element
+                                jQuery('a.img-modal', this).on('click', img_modal_handler);
+                                jQuery('a.tags-modal', this).on('click', tags_modal_handler);
+                                jQuery('td[contenteditable]', this)
+                                .on('focus', td_focus_handler)
+                                .on('keypress', td_keypress_handler)
+                                .on('blur', td_blur_handler);
+                            });
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            displayAlert(errorThrown, 'alert-danger');
+                        }
+            });
+            
+            // Close the modal
+            $modal.modal('hide');
+        });
+        $modal.modal('show').on('hidden', function() {
+            // Move the tags container back
+            jQuery("#hidden-area").append($tags_container);
+        });
+        
+        return false;
+    }
+    jQuery("a.tags-modal").on('click', tags_modal_handler);
+    
+    // Utilize part of the toolbar to display alert message
+    jQuery('#toolbar').append('<div class="btn-wrapper pull-right"><div id="alert-area"></div></div>');
 });

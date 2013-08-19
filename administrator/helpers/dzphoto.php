@@ -136,9 +136,13 @@ class DZPhotoHelper
         
         if (!isset($validData['tags']))
         {
-            $validData['tags'] = null;
+            if ($validData['id']) {
+                $tags = new JHelperTags();
+                $validData['tags'] = explode(',', $tags->getTagIds($validData['id'], 'com_dzphoto.image'));
+            } else {
+                $validData['tags'] = null;
+            }
         }
-        
         // Attempt to save data
         if (!$model->save($validData))
         {

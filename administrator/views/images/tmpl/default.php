@@ -14,8 +14,75 @@ JHtml::addIncludePath(JPATH_COMPONENT.'/helpers/html');
 JHtml::_('bootstrap.tooltip');
 JHtml::_('bootstrap.modal');
 JHtml::_('behavior.multiselect');
-JHtml::_('formbehavior.chosen', 'select');
+$selector = '#jform_tags';
+JHtml::_('formbehavior.ajaxchosen', 
+    new JRegistry(
+        array(
+            'selector' => $selector, 
+            'url'      => JUri::root() . 'index.php?option=com_tags&task=tags.searchAjax',
+            'dataType'    => 'json',
+            'jsonTermKey' => 'like'
+        )
+    )
+);
+JFactory::getDocument()->addScriptDeclaration("
+    (function($){
+        $(document).ready(function () {
 
+            var customTagPrefix = '#new#';
+
+            // Method to add tags pressing enter
+            $('" . $selector . "_chzn input').keydown(function(event) {
+
+                // Tag is greater than 3 chars and enter pressed
+                if (this.value.length >= 3 && (event.which === 13 || event.which === 188)) {
+
+                    // Search an highlighted result
+                    var highlighted = $('" . $selector . "_chzn').find('li.active-result.highlighted').first();
+
+                    // Add the highlighted option
+                    if (event.which === 13 && highlighted.text() !== '')
+                    {
+                        // Extra check. If we have added a custom tag with this text remove it
+                        var customOptionValue = customTagPrefix + highlighted.text();
+                        $('" . $selector . " option').filter(function () { return $(this).val() == customOptionValue; }).remove();
+
+                        // Select the highlighted result
+                        var tagOption = $('" . $selector . " option').filter(function () { return $(this).html() == highlighted.text(); });
+                        tagOption.attr('selected', 'selected');
+                    }
+                    // Add the custom tag option
+                    else
+                    {
+                        var customTag = this.value;
+
+                        // Extra check. Search if the custom tag already exists (typed faster than AJAX ready)
+                        var tagOption = $('" . $selector . " option').filter(function () { return $(this).html() == customTag; });
+                        if (tagOption.text() !== '')
+                        {
+                            tagOption.attr('selected', 'selected');
+                        }
+                        else
+                        {
+                            var option = $('<option>');
+                            option.text(this.value).val(customTagPrefix + this.value);
+                            option.attr('selected','selected');
+
+                            // Append the option an repopulate the chosen field
+                            $('" . $selector . "').append(option);
+                        }
+                    }
+
+                    this.value = '';
+                    $('" . $selector . "').trigger('liszt:updated');
+                    event.preventDefault();
+
+                }
+            });
+        });
+    })(jQuery);
+    "
+);
 // Import CSS
 $document = JFactory::getDocument();
 $document->addStyleSheet('components/com_dzphoto/assets/css/dzphoto.css');
@@ -120,6 +187,9 @@ if (!empty($this->extra_sidebar)) {
                 <th class='center' width="15%">
                 <?php echo JText::_('COM_DZPHOTO_IMAGES_PREVIEW'); ?>
                 </th>
+                <th class='left'>
+                <?php echo JText::_('COM_DZPHOTO_IMAGES_TAGS'); ?>
+                </th>
                 <th class='center'>
                 <?php echo JText::_('COM_DZPHOTO_IMAGES_LINK'); ?>
                 </th>
@@ -157,7 +227,7 @@ if (!empty($this->extra_sidebar)) {
                 $canCheckin = $user->authorise('core.manage',       'com_dzphoto');
                 $canChange  = $user->authorise('core.edit.state',   'com_dzphoto');
                 ?>
-                <tr class="row<?php echo $i % 2; ?>" data-id="<?php echo $item->id; ?>">
+                <tr class="row<?php echo $i % 2; ?>" id="row-item-<?php echo $item->id; ?>">
                     
                 <?php if (isset($this->items[0]->ordering)): ?>
                     <td class="order nowrap center hidden-phone">
@@ -198,6 +268,13 @@ if (!empty($this->extra_sidebar)) {
                         <img src="<?php echo JUri::root().$item->links['thumb']; ?>" title="<?php echo $item->title; ?>" alt="<?php echo $item->title; ?>" />
                     </a>
                 </td>
+                <td>
+                    <?php $tags = array(); ?>
+                    <?php foreach($item->tags->itemTags as $tag) { $tags[$tag->id] = $tag->title; } ?>
+                    <?php echo join(', ', $tags); ?>
+                    <br />
+                    <a href="#" class="tags-modal" data-item-id="<?php echo $item->id; ?>" data-item-tags='<?php echo json_encode($tags, JSON_FORCE_OBJECT); ?>' data-item-title="<?php echo $item->title; ?>"><?php echo JText::_('COM_DZPHOTO_IMAGES_EDIT_TAGS'); ?></a>
+                </td>
                 <td class="center">
                     <a href="<?php echo JURI::root().$item->links['original']; ?>" target="_nblank" class="btn btn-link">
                         <?php echo JText::_('COM_DZPHOTO_IMAGES_LINK_ORIGINAL'); ?>&nbsp;<span class="icon-out-2" aria-hidden="true"></span>
@@ -234,6 +311,8 @@ if (!empty($this->extra_sidebar)) {
     </div>
 </form>        
 <div id="item-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-header">
+    </div>
     <div class="modal-body">
     </div>
     <div class="modal-footer">
@@ -245,4 +324,13 @@ if (!empty($this->extra_sidebar)) {
         </button>
     </div>
 </div>
-        
+<div id="hidden-area" style="display:none">
+    <div class="tags-container">
+        <form id="tags_form" action="index.php?option=com_dzphoto&amp;task=images.saveImageAjax" method="POST">
+            <input id="jform_id" type="hidden" name="jform[id]" />
+            <select id="jform_tags" name="jform[tags][]" multiple="true">
+            </select>
+            <?php echo JHtml::_('form.token'); ?>
+        </form>
+    </div>
+</div>
