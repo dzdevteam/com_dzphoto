@@ -4,6 +4,14 @@
         label="COM_DZPHOTO_COMPONENT_LABEL"
         description="COM_DZPHOTO_COMPONENT_DESC"
     >
+        <field type="spacer" />
+        
+        <field
+            name="imagedir" default="images/dzphoto"
+            type="text" filter="path" required="true"
+            class="required" label="COM_DZPHOTO_CONFIG_LBL_UPLOAD_DIR"
+            description="COM_DZPHOTO_CONFIG_DESC_UPLOAD_DIR" />
+        
         <field type="spacer" label="COM_DZPHOTO_THUMBNAIL_SIZE" class="nav-header"/>
         
         <field
