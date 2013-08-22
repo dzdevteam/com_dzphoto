@@ -15,7 +15,7 @@ jimport('joomla.application.component.modeladmin');
 /**
  * Dzphoto model.
  */
-class DzphotoModelimage extends JModelAdmin
+class DZPhotoModelImage extends JModelAdmin
 {
     /**
      * @var     string  The prefix to use with controller messages.
@@ -124,4 +124,111 @@ class DzphotoModelimage extends JModelAdmin
         }
     }
 
+    /**
+     * Method to delete one or more records.
+     *
+     * @param   array  &$pks  An array of record primary keys.
+     *
+     * @return  boolean  True if successful, false if an error occurs.
+     *
+     * @since   12.2
+     */
+    public function delete(&$pks)
+    {
+        $dispatcher = JEventDispatcher::getInstance();
+        $pks = (array) $pks;
+        $table = $this->getTable();
+
+        // Include the content plugins for the on delete events.
+        JPluginHelper::importPlugin('content');
+
+        // Iterate the items to delete each one.
+        foreach ($pks as $i => $pk)
+        {
+
+            if ($table->load($pk))
+            {
+
+                if ($this->canDelete($table))
+                {
+
+                    $context = $this->option . '.' . $this->name;
+
+                    // Trigger the onContentBeforeDelete event.
+                    $result = $dispatcher->trigger($this->event_before_delete, array($context, $table));
+                    if (in_array(false, $result, true))
+                    {
+                        $this->setError($table->getError());
+                        return false;
+                    }
+                    
+                    // Get the images' paths
+                    $links = new JRegistry();
+                    $links->loadString($table->links);
+                    $links = $links->toArray();
+                    $directory = pathinfo($links['original'], PATHINFO_DIRNAME);
+                    $filename = pathinfo($links['original'], PATHINFO_FILENAME);
+                    
+                    // Get the id
+                    $id = $table->id;
+                    
+                    // Attempt to delete the item
+                    if (!$table->delete($pk))
+                    {
+                        $this->setError($table->getError());
+                        return false;
+                    }
+                    
+                    // Image item delete successfully, thus we also delete the images from the system
+                    $images_paths = glob(JPATH_ROOT.'/'.$directory.'/'.$filename.'*');
+                    
+                    if (!empty($images_paths)) {
+                        foreach ($images_paths as $image_path) {
+                            unlink($image_path); // Don't really care if it return false or not
+                        }
+                    }
+                    
+                    // We also remove all relations for this id
+                    $db = JFactory::getDBO();
+                    $query = $db->getQuery(true);
+                    $query->delete('#__dzphoto_relations');
+                    $query->where('imageid = '.$id);
+                    $db->setQuery($query);
+                    $db->execute();
+                    
+                    // Trigger the onContentAfterDelete event.
+                    $dispatcher->trigger($this->event_after_delete, array($context, $table));
+
+                }
+                else
+                {
+
+                    // Prune items that you can't change.
+                    unset($pks[$i]);
+                    $error = $this->getError();
+                    if ($error)
+                    {
+                        JLog::add($error, JLog::WARNING, 'jerror');
+                        return false;
+                    }
+                    else
+                    {
+                        JLog::add(JText::_('JLIB_APPLICATION_ERROR_DELETE_NOT_PERMITTED'), JLog::WARNING, 'jerror');
+                        return false;
+                    }
+                }
+
+            }
+            else
+            {
+                $this->setError($table->getError());
+                return false;
+            }
+        }
+
+        // Clear the component's cache
+        $this->cleanCache();
+
+        return true;
+    }
 }

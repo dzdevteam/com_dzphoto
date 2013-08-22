@@ -63,10 +63,10 @@ class DZPhotoControllerUpload extends JControllerLegacy
             
             // Now we create different sizes for this image
             $links = DZPhotoHelper::generateThumbs($targetfile);
-            $links['original'] = $basedir.'/'.$year.'/'.$month.'/'.$name;
             
             // Create a new item in database to represent the image
             $album = $this->input->get('album', 0, 'int');
+            $links['original'] = $basedir.'/'.$year.'/'.$month.'/'.$name;
             DZPhotoHelper::updateImageItem(
                 array(
                     'id' => 0, 
