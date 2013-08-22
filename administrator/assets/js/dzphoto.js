@@ -23,6 +23,7 @@ if (typeof Dropzone !== 'undefined') {
     }
 }
 jQuery(document).ready(function() {
+    /* -------- COMMON --------- */
     // Utility function to display alert message
     var displayAlert = function (message, alertClass) {
         // Prepare the alert message
@@ -33,13 +34,74 @@ jQuery(document).ready(function() {
         
         // Display the alert
         jQuery('#alert-area').html($alert_tpl);
-    }
+    },
+    // Disable handler to prevent button from submitting form
+    btn_disable_handler = function() {
+        return false;
+    };
     
+    
+    
+    // Utilize part of the toolbar to display alert message
+    jQuery('#toolbar').append('<div class="btn-wrapper pull-right"><div id="alert-area"></div></div>');
+    
+    /* ----- UPLOAD VIEW ------- */
     // Add the clear dropzone button functionality
     jQuery('#clearzone button').on('click', function(){
         Dropzone.forElement("#adminForm").removeAllFiles();
     });
     
+    // Bind albums select to hidden album input
+    var albums_select_handler = function() {
+        jQuery('input[name="album"]').val(jQuery(this).val());
+    }
+    jQuery('select[name="albums"]').on('change', albums_select_handler);
+    
+    // Add functionality for create album through ajax
+    var album_submit_handler = function() {
+        // Loading animation
+        jQuery('#alert-area').html('<img src="../media/system/images/modal/spinner.gif" />');
+        
+        var $form = jQuery('form#album-form');
+        jQuery.ajax({
+            type: 'POST',
+            url: 'index.php?option=com_dzphoto&task=upload.newalbum&format=json',
+            data: $form.serialize(),
+            success: function(response) {
+                $form.load('index.php?option=com_dzphoto&view=upload #album-form > *', null, function() {
+                    displayAlert(response.message, 'alert-success');
+                    
+                    // Rebind event
+                    jQuery('button#newalbum-submit', $form).on('click', album_submit_handler);
+                    jQuery('select[name="albums"])', $form).on('change', albums_select_handler);
+                });
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                displayAlert(errorThrown, 'alert-danger');
+            }
+        });
+        
+        return false;
+    };
+    jQuery('button#newalbum-submit').on('click', album_submit_handler);
+    
+    // Functionality for proceed button
+    var $upload_accordion_heading = jQuery('a[href="#add-images"]'),
+        disable_upload_accordion = function() {
+            $upload_accordion_heading.addClass('muted').attr('href', null);
+        },
+        enable_upload_accordion = function() {
+            $upload_accordion_heading.removeClass('muted').attr('href', '#add-images');
+        }
+        proceed_btn_handler = function() {
+        enable_upload_accordion();
+        $upload_accordion_heading.trigger('click');
+    }
+    disable_upload_accordion();
+    jQuery('button#proceed').on('click', proceed_btn_handler);
+    jQuery('a[href="#new-album"]').on('click', disable_upload_accordion);
+    
+    /* -------- IMAGE VIEW ----------- */
     // Allow editing images' title and caption right on list view
     var td_focus_handler = function() {
         // Store current data
@@ -173,6 +235,86 @@ jQuery(document).ready(function() {
     }
     jQuery("a.tags-modal").on('click', tags_modal_handler);
     
-    // Utilize part of the toolbar to display alert message
-    jQuery('#toolbar').append('<div class="btn-wrapper pull-right"><div id="alert-area"></div></div>');
+    /* ------- ALBUMS VIEW ------- */
+    // Handler for album modal
+    var album_modal_handler = function() {
+        var $modal = jQuery("#item-modal"),
+            title  = '<h3 class="pull-left">' + jQuery(this).data('album-title') + '</h3>',
+            mode   = jQuery(this).data('album-mode'),
+            src    = 'index.php?option=com_dzphoto&view=album&id=' + jQuery(this).data('album-id') + '&tmpl=component',
+            $head_btns = jQuery('<div class="btn-group pull-right" data-toggle="buttons-radio">' +
+            '<button type="button" class="btn btn-mode-view" data-href="'+src+'&mode=view">'+Joomla.JText._('COM_DZPHOTO_ALBUMS_VIEW_IMAGES')+'</button>' +
+            '<button type="button" class="btn btn-mode-add" data-href="'+src+'&mode=add">'+Joomla.JText._('COM_DZPHOTO_ALBUMS_ADD_IMAGES')+'</button>' +
+                        '</div>');           
+        jQuery("div.modal-header", $modal).html(title).append($head_btns).append('<div class="clearfix"></div>');
+        jQuery("button.btn-mode-"+mode, $head_btns).addClass('active');
+        jQuery("div.modal-body > iframe", $modal).attr('src', src + '&mode=' + mode);
+        jQuery("button.btn", $head_btns).on('click', function() {
+            jQuery("div.modal-body > iframe", $modal).attr('src', jQuery(this).data('href'));
+        });
+        $modal.modal('show');
+    };
+    jQuery("a.album-modal").on('click', album_modal_handler);
+    
+    /* ------- ALBUM VIEW ------ */
+
+    // Image action button handler
+    var btn_action_handler = function() {
+        // Prevent this being clicked again
+        jQuery(this).off('click', btn_action_handler);
+        jQuery(this).on('click', btn_disable_handler);
+        
+        // Prepare data
+        var data = new Object(), 
+            $tokeninput = jQuery('input[type="hidden"][value="1"]'),
+            button = this, url = null;
+        data.albumid = jQuery(this).data('album-id');
+        data.imageid = jQuery(this).data('image-id');
+        data[$tokeninput.attr('name')] = 1;
+            
+        // Loading animation
+        jQuery('#alert-area').html('<img src="../media/system/images/modal/spinner.gif" />');
+        
+        // Mute effect for the row
+        jQuery(this).parents('tr').css('opacity', '0.7');
+        
+        // Submit data
+        if (jQuery(this).hasClass('btn-remove-img'))
+            url = 'index.php?option=com_dzphoto&task=album.removeImage&format=json';
+        else if (jQuery(this).hasClass('btn-add-img'))
+            url = 'index.php?option=com_dzphoto&task=album.addImage&format=json';
+        
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            data: data
+        }).done(function(response) {
+            displayAlert(response.message, 'alert-success');
+            
+            // Hide row animation
+            jQuery(button).parents('tr').fadeOut(400, function() {
+                // Then remove the row completely
+                jQuery(this).remove(); 
+            });
+            
+            // Reload the table when the removed row is the only left
+            if (jQuery('table#imageList tbody tr').length == 1) {
+                displayAlert('<img src="../media/system/images/modal/spinner.gif" />&nbsp;' + Joomla.JText._('COM_DZPHOTO_ALBUM_LOADING_IMAGES'), 'alert-success');
+                
+                jQuery('table#imageList').load(window.location.href + ' #imageList > *', function() {
+                    displayAlert(Joomla.JText._('COM_DZPHOTO_ALBUM_LOADED_IMAGES'), 'alert-success');
+                })
+            }
+        }).error(function(jqXHR, textStatus, errorThrown) {
+            displayAlert(errorThrown, 'alert-danger');
+            
+            // Re-enable click event on error
+            jQuery(button).off('click', btn_disable_handler);
+            jQuery(button).on('click', btn_add_handler);
+        });
+        
+        // Prevent submitting form
+        return false;
+    };
+    jQuery("button.btn-remove-img, button.btn-add-img").on('click', btn_action_handler);
 });

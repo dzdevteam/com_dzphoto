@@ -66,11 +66,13 @@ class DZPhotoControllerUpload extends JControllerLegacy
             $links['original'] = $basedir.'/'.$year.'/'.$month.'/'.$name;
             
             // Create a new item in database to represent the image
+            $album = $this->input->get('album', 0, 'int');
             DZPhotoHelper::updateImageItem(
                 array(
                     'id' => 0, 
                     'title' => pathinfo($links['original'], PATHINFO_BASENAME),
-                    'links' => $links
+                    'links' => $links,
+                    'album' => $album
                 )
             );
             
@@ -79,5 +81,80 @@ class DZPhotoControllerUpload extends JControllerLegacy
         }
         
         jexit(); // Close application
+    }
+    
+    public function newalbum() {
+        header('Content-Type: application/json');
+        JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
+        
+        $newname = $this->input->get('newalbum', '');
+        if (empty($newname)) {
+            DZPhotoHelper::exitWithError(JText::_('COM_DZPHOTO_WARNING_PROVIDE_VALID_NAME'));
+        }
+        
+        JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR.'/components/com_categories/models');
+        JModelLegacy::addTablePath(JPATH_ADMINISTRATOR.'/components/com_categories/tables');
+        JForm::addFormPath(JPATH_ADMINISTRATOR.'/components/com_categories/models/forms');
+        $model = JModelLegacy::getInstance('Category', 'CategoriesModel');
+        
+        $user = JFactory::getUser();
+        if (!$user->authorise('core.create', 'com_categories')) {
+            DZPhotoHelper::exitWithError(JText::_('JLIB_APPLICATION_ERROR_SAVE_NOT_PERMITTED'), 500);
+        }
+        
+        $data = array(
+            'id'        => 0, 
+            'parent_id' => 1, 
+            'title'     => $newname, 
+            'extension' => 'com_dzphoto.images', 
+            'published' => 1,
+            'language'  => '*',
+            'params'    => array()
+        );
+        $form = $model->getForm($data, false);
+        if (!$form) {
+            DZPhotoHelper::exitWithError($model->getError(), 500);
+        };
+        
+        $validData = $model->validate($form, $data);
+        if ($validData === false) {
+            // Get the validation messages.
+            $errors = $model->getErrors();
+            $messages = array();
+            
+            // Push up to three validation messages out to the user.
+            for ($i = 0, $n = count($errors); $i < $n && $i < 3; $i++)
+            {
+                if ($errors[$i] instanceof Exception)
+                {
+                    $messages[] = $errors[$i]->getMessage();
+                }
+                else
+                {
+                    $messages[] = $errors[$i];
+                }
+            }
+            
+            DZPhotoHelper::exitWithError(join(',', $messages), 500);
+        }
+        
+        if (!isset($validData['tags']))
+        {
+            if ($validData['id']) {
+                $tags = new JHelperTags();
+                $validData['tags'] = explode(',', $tags->getTagIds($validData['id'], 'com_dzphoto.image'));
+            } else {
+                $validData['tags'] = null;
+            }
+        }
+        // Attempt to save data
+        if (!$model->save($validData))
+        {
+            DZPhotoHelper::exitWithError(JText::sprintf('JLIB_APPLICATION_ERROR_SAVE_FAILED', $model->getError()), 500);
+        }
+        
+        // Annout success
+        echo json_encode(array('message' => JText::_('COM_DZPHOTO_SAVE_SUCCESS')));
+        jexit();
     }
 }

@@ -22,6 +22,10 @@ class DZPhotoViewUpload extends JViewLegacy
      */
     public function display($tpl = null)
     {
+        $this->form = new JForm('jform');
+        $this->form->addFormPath(JPATH_COMPONENT.'/models/forms');
+        $this->form->loadFile('upload');
+        
         if (count($errors = $this->get('Errors')))
         {
             JError::raiseWarning(500, implode("\n", $errors));

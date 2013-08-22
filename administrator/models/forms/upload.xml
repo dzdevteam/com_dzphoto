@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fieldset>
+        <field 
+            name="albums" type="category"
+            extension="com_dzphoto.images"
+            labelclass="control-label"
+            label="COM_DZPHOTO_FORM_UPLOAD_LBL_ALBUMS"
+            description="COM_DZPHOTO_FORM_UPLOAD_DESC_ALBUMS">
+            <option value="">COM_DZPHOTO_OPTION_SELECT_ALBUM</option>
+        </field>
+        <field
+            name="newalbum" type="text"
+            labelclass="control-label"
+            label="COM_DZPHOTO_FORM_UPLOAD_LBL_NEW_ALBUM"
+            description="COM_DZPHOTO_FORM_UPLOAD_DESC_NEW_ALBUM" />
+    </fieldset>
+</form>

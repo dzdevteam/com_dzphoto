@@ -9,7 +9,10 @@
 // no direct access
 defined('_JEXEC') or die;
 
-JHtml::_('jquery.framework');
+JHtml::addIncludePath(JPATH_COMPONENT.'/helpers/html');
+JHtml::_('behavior.framework');
+JHtml::_('bootstrap.tooltip');
+JHtml::_('formbehavior.chosen', 'select');
 
 // Import CSS
 $document = JFactory::getDocument();
@@ -27,16 +30,40 @@ $document->addScript('components/com_dzphoto/assets/js/dzphoto.js');
 <?php else : ?>
 <div id="j-main-container">
 <?php endif;?>
-    <form action="<?php echo JRoute::_('index.php?option=com_dzphoto&view=upload&task=upload.upload'); ?>" method="post" id="adminForm" enctype="multipart/form-data" class="dropzone dz-clickable">
-        <div class="fallback">
-            <input type="file" name="file" accept="image/*" />
-            <input type="submit" class="btn" value="<?php echo JText::_('JSUBMIT'); ?>" />
+    <?php echo JHtml::_('bootstrap.startAccordion', 'upload-arcordion', array('parent' => true, 'active' => 'new-album')); ?>
+        <?php echo JHtml::_('bootstrap.addSlide', 'upload-arcordion', JText::_('COM_DZPHOTO_UPLOAD_NEW_ALBUM'), 'new-album'); ?>
+        <form id="album-form" class="form-horizontal">
+            <div class="control-group">
+                <?php echo $this->form->getLabel('newalbum'); ?>
+                <div class="controls">
+                    <?php echo $this->form->getInput('newalbum'); ?>
+                    <button id="newalbum-submit" class="btn btn-primary"><?php echo JText::_('COM_DZPHOTO_UPLOAD_CREATE_ALBUM'); ?></button>
+                </div>
+            </div>
+            <div class="control-group">
+                <?php echo $this->form->getLabel('albums'); ?>
+                <div class="controls">
+                    <?php echo $this->form->getInput('albums'); ?>
+                </div>
+            </div>
+            <?php echo JHtml::_('form.token'); ?>
+        </form>
+        <button id="proceed" class="btn btn-primary"><?php echo JText::_('COM_DZPHOTO_UPLOAD_PROCEED'); ?></button>
+        <?php echo JHtml::_('bootstrap.endSlide'); ?>
+        <?php echo JHtml::_('bootstrap.addSlide', 'upload-arcordion', JText::_('COM_DZPHOTO_UPLOAD_ADD_IMAGES'), 'add-images'); ?>
+        <form action="<?php echo JRoute::_('index.php?option=com_dzphoto&view=upload&task=upload.upload'); ?>" method="post" id="adminForm" enctype="multipart/form-data" class="dropzone dz-clickable">
+            <div class="fallback">
+                <input type="file" name="file" accept="image/*" />
+                <input type="submit" class="btn" value="<?php echo JText::_('JSUBMIT'); ?>" />
+            </div>
+            <input id="albumid" type="hidden" name="album" value="" />
+            <?php echo JHtml::_( 'form.token' ); ?>
+        </form>
+        <div class="row" id="clearzone" style="display:none;">
+            <div class="span12 text-center">
+                <button class="btn btn-danger"><?php echo JText::_('COM_DZPHOTO_UPLOAD_CLEAR_ALL'); ?></button>
+            </div>
         </div>
-        <?php echo JHtml::_( 'form.token' ); ?>
-    </form>
-    <div class="row" id="clearzone" style="display:none;">
-        <div class="span12 text-center">
-            <button class="btn btn-danger"><?php echo JText::_('COM_DZFOODMENU_CLEAR_ALL'); ?></button>
-        </div>
-    </div>
+        <?php echo JHtml::_('bootstrap.endSlide'); ?>
+    <?php echo JHtml::_('bootstrap.endAccordion'); ?>
 </div>

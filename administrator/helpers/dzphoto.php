@@ -31,6 +31,19 @@ class DZPhotoHelper
             'index.php?option=com_dzphoto&view=images',
             $vName == 'images'
         );
+        
+        JHtmlSidebar::addEntry(
+            JText::_('COM_DZPHOTO_TITLE_ALBUMS'),
+            'index.php?option=com_categories&extension=com_dzphoto.images',
+            $vName == 'categories.images'
+        );
+        
+        if ($vName=='categories.images') {            
+            // A hack to use our categories template instead of built-in categories template
+            $controller = JControllerLegacy::getInstance('', 'CategoriesController');
+            $view       = $controller->getView();
+            $view->addTemplatePath(JPATH_ADMINISTRATOR.'/components/com_dzphoto/views/albums/tmpl');
+        }
     }
 
     /**
@@ -148,6 +161,30 @@ class DZPhotoHelper
         {
             DZPhotoHelper::exitWithError(JText::sprintf('JLIB_APPLICATION_ERROR_SAVE_FAILED', $model->getError()), 500);
         }
+        
+        // Create relation between images and album
+        if (isset($data['album']) && (int) $data['album']) {
+            $table = JTable::getInstance('Relation', 'DZPhotoTable');
+            
+            // Check for already established relation
+            if (!$table->load( 
+                array(
+                    'catid' => $data['album'], 
+                    'imageid' => $model->getState('image.id')
+                )
+            )) {
+                $db = JFactory::getDBO();
+                $relation = new stdClass();
+                $relation->catid = $data['album'];
+                $relation->imageid = $model->getState('image.id');
+                try {
+                    $db->insertObject('#__dzphoto_relations', $relation);
+                } catch(Exception $e) {
+                    DZPhotoHelper::exitWithError($e->getMessage(), 500);
+                }
+                
+            }
+        }
     }
     
     /**
@@ -160,9 +197,13 @@ class DZPhotoHelper
      */
     public static function exitWithError($error, $status_code = 500)
     {
-        header($_SERVER['SERVER_PROTOCOL'] . " $status_code " . $error, true, $status_code);
-        header('Content-Type: application/json');
-        echo json_encode(array('message' => $error));
-        jexit();
+        if (JFactory::getApplication()->input->get('format', '') == 'json') {
+            header($_SERVER['SERVER_PROTOCOL'] . " $status_code " . $error, true, $status_code);
+            header('Content-Type: application/json');
+            echo json_encode(array('message' => $error));
+            jexit();
+        } else {
+            throw new Exception($error, $status_code);
+        }
     }
 }

@@ -57,19 +57,19 @@ class DzphotoViewImages extends JViewLegacy
 
         JToolBarHelper::title(JText::_('COM_DZPHOTO_TITLE_IMAGES'), 'images.png');
 
-        //Check if the form exists before showing the add/edit buttons
-        $formPath = JPATH_COMPONENT_ADMINISTRATOR.'/views/image';
-        if (file_exists($formPath)) {
-
-            if ($canDo->get('core.create')) {
-                JToolBarHelper::addNew('image.add','JTOOLBAR_NEW');
-            }
-
-            if ($canDo->get('core.edit') && isset($this->items[0])) {
-                JToolBarHelper::editList('image.edit','JTOOLBAR_EDIT');
-            }
-
-        }
+//         //Check if the form exists before showing the add/edit buttons
+//         $formPath = JPATH_COMPONENT_ADMINISTRATOR.'/views/image';
+//         if (file_exists($formPath)) {
+// 
+//             if ($canDo->get('core.create')) {
+//                 JToolBarHelper::addNew('image.add','JTOOLBAR_NEW');
+//             }
+// 
+//             if ($canDo->get('core.edit') && isset($this->items[0])) {
+//                 JToolBarHelper::editList('image.edit','JTOOLBAR_EDIT');
+//             }
+// 
+//         }
 
         if ($canDo->get('core.edit.state')) {
 
@@ -112,15 +112,16 @@ class DzphotoViewImages extends JViewLegacy
         $this->extra_sidebar = '';
         
         JHtmlSidebar::addFilter(
-
             JText::_('JOPTION_SELECT_PUBLISHED'),
-
             'filter_published',
-
             JHtml::_('select.options', JHtml::_('jgrid.publishedOptions'), "value", "text", $this->state->get('filter.state'), true)
-
         );
-
+        
+        JHtmlSidebar::addFilter(
+            JText::_('COM_DZPHOTO_OPTION_SELECT_ALBUM'),
+            'filter_album',
+            JHtml::_('select.options', JHtml::_('category.options', 'com_dzphoto.images'), 'value', 'text', $this->state->get('filter.album'))
+        );
         
     }
     
@@ -130,11 +131,9 @@ class DzphotoViewImages extends JViewLegacy
         'a.id' => JText::_('JGRID_HEADING_ID'),
         'a.ordering' => JText::_('JGRID_HEADING_ORDERING'),
         'a.state' => JText::_('JSTATUS'),
-        'a.checked_out' => JText::_('COM_DZPHOTO_IMAGES_CHECKED_OUT'),
-        'a.checked_out_time' => JText::_('COM_DZPHOTO_IMAGES_CHECKED_OUT_TIME'),
         'a.created_by' => JText::_('COM_DZPHOTO_IMAGES_CREATED_BY'),
-        'a.caption' => JText::_('COM_DZPHOTO_IMAGES_CAPTION'),
-        'a.link' => JText::_('COM_DZPHOTO_IMAGES_LINK'),
+        'a.created' => JText::_('COM_DZPHOTO_IMAGES_CREATED'),
+        'a.title' => JText::_('COM_DZPHOTO_IMAGES_TITLE')
         );
     }
 

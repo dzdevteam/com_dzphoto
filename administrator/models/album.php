@@ -14,7 +14,7 @@ jimport('joomla.application.component.modellist');
 /**
  * Methods supporting a list of Dzphoto records.
  */
-class DzphotoModelimages extends JModelList {
+class DzphotoModelAlbum extends JModelList {
 
     protected $context = 'com_dzphoto.image';
     
@@ -60,10 +60,12 @@ class DzphotoModelimages extends JModelList {
         $published = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_published', '', 'string');
         $this->setState('filter.state', $published);
 
-        $album = $app->getUserStateFromRequest($this->context . '.filter.album', 'filter_album', 0, 'int');
-        if ($album)
-            $this->setState('filter.album', $album);
+        $album = $app->input->get('id', 0, 'int');
+        $this->setState('filter.id', $album);
 
+        $mode = $app->input->get('mode', 'view', 'string');
+        $this->setState('album.mode', $mode);
+        
         // Load the parameters.
         $params = JComponentHelper::getParams('com_dzphoto');
         $this->setState('params', $params);
@@ -140,11 +142,16 @@ class DzphotoModelimages extends JModelList {
             }
         }
 
-        // Filter by album
-        $album = (int) $this->getState('filter.album');
-        if ($album) {
+        // Filter by album and mode
+        $album = (int) $this->getState('filter.id');
+        $mode = $this->getState('album.mode');
+        if ($mode == 'add') {
+            $query->join('LEFT', '#__dzphoto_relations as r ON a.id = r.imageid AND r.catid = ' . $album);
+            $query->where('r.catid IS NULL');
+        } else {
             $query->join('INNER', '#__dzphoto_relations as r ON a.id = r.imageid AND r.catid = ' . $album);
         }
+        
 
 
         // Add the list ordering clause.

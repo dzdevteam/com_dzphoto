@@ -44,9 +44,9 @@
     <administration>
         <menu img="components/com_dzphoto/assets/images/s_com_dzphoto.png" >COM_DZPHOTO</menu>
         <submenu>
-            
-            <menu link="option=com_dzphoto&amp;view=images" view="images" img="components/com_dzphoto/assets/images/s_images.png" alt="Dzphoto/Images">COM_DZPHOTO_TITLE_IMAGES</menu>
-
+            <menu link="option=com_dzphoto&amp;view=upload" view="upload">COM_DZPHOTO_TITLE_UPLOAD</menu>
+            <menu link="option=com_dzphoto&amp;view=images" view="images">COM_DZPHOTO_TITLE_IMAGES</menu>
+            <menu link="option=com_dzphoto&amp;view=albums" view="albums">COM_DZPHOTO_TITLE_ALBUMS</menu>
         </submenu>
         <files folder="administrator">
             <filename>access.xml</filename>
