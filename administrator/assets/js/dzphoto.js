@@ -51,12 +51,6 @@ jQuery(document).ready(function() {
         Dropzone.forElement("#adminForm").removeAllFiles();
     });
     
-    // Bind albums select to hidden album input
-    var albums_select_handler = function() {
-        jQuery('input[name="album"]').val(jQuery(this).val());
-    }
-    jQuery('select[name="albums"]').on('change', albums_select_handler);
-    
     // Add functionality for create album through ajax
     var album_submit_handler = function() {
         // Loading animation
@@ -93,7 +87,11 @@ jQuery(document).ready(function() {
         enable_upload_accordion = function() {
             $upload_accordion_heading.removeClass('muted').attr('href', '#add-images');
         }
-        proceed_btn_handler = function() {
+        proceed_btn_handler = function() {        
+        // Put selected album id into hidden input
+        jQuery('input[name="album"]').val(jQuery('select[name="albums"]').val());
+        
+        // Reveal the upload accordion
         enable_upload_accordion();
         $upload_accordion_heading.trigger('click');
     }
