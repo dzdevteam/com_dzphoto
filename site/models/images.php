@@ -24,6 +24,20 @@ class DzphotoModelImages extends JModelList {
      * @since    1.6
      */
     public function __construct($config = array()) {
+        if (empty($config['filter_fields'])) {
+            $config['filter_fields'] = array(
+                                'id', 'a.id',
+                'ordering', 'a.ordering',
+                'state', 'a.state',
+                'created_by', 'a.created_by',
+                'created', 'a.created',
+                'title', 'a.title',
+                'alias', 'a.alias',
+                'caption', 'a.caption',
+                'link', 'a.link',
+
+            );
+        }
         parent::__construct($config);
     }
 
@@ -34,7 +48,7 @@ class DzphotoModelImages extends JModelList {
      *
      * @since   1.6
      */
-    protected function populateState($ordering = null, $direction = null) {
+    protected function populateState($ordering = 'created', $direction = 'DESC') {
 
         // Initialise variables.
         $app = JFactory::getApplication();
@@ -47,12 +61,29 @@ class DzphotoModelImages extends JModelList {
         $this->setState('list.start', $limitstart);
 
         
-        if(empty($ordering)) {
-            $ordering = 'a.ordering';
+        $orderCol = $app->input->get('filter_order', 'a.created');
+        if (!in_array($orderCol, $this->filter_fields))
+        {
+            $orderCol = 'a.created';
         }
 
+        $listOrder = $app->input->get('filter_order_Dir', 'DESC');
+        if (!in_array(strtoupper($listOrder), array('ASC', 'DESC', '')))
+        {
+            $listOrder = 'DESC';
+        }
+        
+        // Only view published images
+        $this->setState('filter.published', 1);
+        
+        // Filter by albums
+        $albumid = $app->input->get('filter_albumid', array(), 'array');
+        if (!empty($albumid)) {
+            $this->setState('filter.albumid', $albumid);
+        }
+        
         // List state information.
-        parent::populateState($ordering, $direction);
+        parent::populateState($orderCol, $listOrder);
     }
 
     /**
@@ -76,9 +107,9 @@ class DzphotoModelImages extends JModelList {
         $query->from('`#__dzphoto_images` AS a');
 
         
-    // Join over the users for the checked out user.
-    $query->select('uc.name AS editor');
-    $query->join('LEFT', '#__users AS uc ON uc.id=a.checked_out');
+        // Join over the users for the checked out user.
+        $query->select('uc.name AS editor');
+        $query->join('LEFT', '#__users AS uc ON uc.id=a.checked_out');
     
         // Join over the created by field 'created_by'
         $query->select('created_by.name AS created_by');
@@ -96,8 +127,35 @@ class DzphotoModelImages extends JModelList {
             }
         }
 
-        
+        // Filter by published state
+        $published = $this->getState('filter.published');
 
+        if (is_numeric($published))
+        {
+            // Use article state if badcats.id is null, otherwise, force 0 for unpublished
+            $query->where('state = ' . (int) $published);
+        }
+        elseif (is_array($published))
+        {
+            JArrayHelper::toInteger($published);
+            $published = implode(',', $published);
+            // Use article state if badcats.id is null, otherwise, force 0 for unpublished
+            $query->where('state IN (' . $published . ')');
+        }
+        
+        // Filter by album
+        $albumid = $this->getState('filter.albumid');
+        if (is_numeric($albumid)) {
+            $query->join('INNER', '#__dzphoto_relations as r ON r.imageid = a.id AND r.catid = ' .(int) $albumid);
+        } elseif (is_array($albumid)) {
+            JArrayHelper::toInteger($albumid);
+            $albumid = implode(',', $albumid);
+            $query->join('INNER', '#__dzphoto_relations as r ON r.imageid = a.id AND r.catid IN (' . $albumid . ')');
+        }
+        
+        // Add the list ordering clause.
+        $query->order($this->getState('list.ordering', 'a.created') . ' ' . $this->getState('list.direction', 'DESC'));
+        
         return $query;
     }
 

@@ -5,4 +5,30 @@
                         <![CDATA[COM_DZPHOTO_TITLE_LIST_VIEW_IMAGES_DESC]]>
         </message>
     </layout>
+    <fields name="request">
+        <fieldset name="request">
+            <field
+                name="filter_albumid" multiple="true"
+                type="category" extension="com_dzphoto.images"
+                label="COM_DZPHOTO_REQUEST_LBL_FILTER_ALBUM_ID"
+                description="COM_DZPHOTO_REQUEST_DESC_FILTER_ALBUM_ID" />
+            <field
+                name="filter_order"
+                type="list" default="a.created"
+                label="COM_DZPHOTO_REQUEST_LBL_FILTER_ORDER"
+                description="COM_DZPHOTO_REQUEST_DESC_FILTER_ORDER">
+                <option value="a.title">COM_DZPHOTO_OPTION_TITLE</option>
+                <option value="a.ordering">COM_DZPHOTO_OPTION_ORDERING</option>
+                <option value="a.created">COM_DZPHOTO_OPTION_CREATED</option>
+            </field>
+            <field
+                name="filter_order_Dir"
+                type="list" default="DESC"
+                label="COM_DZPHOTO_REQUEST_LBL_FILTER_ORDER_DIR"
+                description="COM_DZPHOTO_REQUEST_DESC_FILTER_ORDER_DIR">
+                <option value="ASC">JGLOBAL_ORDER_ASCENDING</option>
+                <option value="DESC">JGLOBAL_ORDER_DESCENDING</option>
+            </field>
+        </fieldset>
+    </fields>
 </metadata>
