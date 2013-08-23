@@ -20,16 +20,12 @@ $lang->load('com_dzphoto', JPATH_ADMINISTRATOR);
 
         <ul class="fields_list">
 
-                        <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_ID'); ?>:
+            <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_ID'); ?>:
             <?php echo $this->item->id; ?></li>
             <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_ORDERING'); ?>:
             <?php echo $this->item->ordering; ?></li>
             <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_STATE'); ?>:
             <?php echo $this->item->state; ?></li>
-            <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_CHECKED_OUT'); ?>:
-            <?php echo $this->item->checked_out; ?></li>
-            <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_CHECKED_OUT_TIME'); ?>:
-            <?php echo $this->item->checked_out_time; ?></li>
             <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_CREATED_BY'); ?>:
             <?php echo $this->item->created_by; ?></li>
             <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_TITLE'); ?>:
@@ -39,7 +35,12 @@ $lang->load('com_dzphoto', JPATH_ADMINISTRATOR);
             <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_CAPTION'); ?>:
             <?php echo $this->item->caption; ?></li>
             <li><?php echo JText::_('COM_DZPHOTO_FORM_LBL_IMAGE_LINK'); ?>:
-            <?php echo $this->item->link; ?></li>
+                <ul>
+                    <?php foreach ($this->item->links as $type => $link) : ?>
+                    <li><?php echo JText::_('COM_DZPHOTO_IMAGES_LINK_'.$type); ?>: <?php echo $link; ?>
+                    <?php endforeach; ?>
+                </ul>
+            </li>
 
 
         </ul>

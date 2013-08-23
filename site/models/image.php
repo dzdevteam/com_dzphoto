@@ -86,6 +86,15 @@ class DzphotoModelImage extends JModelForm
                 // Convert the JTable to a clean JObject.
                 $properties = $table->getProperties(1);
                 $this->_item = JArrayHelper::toObject($properties, 'JObject');
+                
+                // Convert links
+                $registry = new JRegistry();
+                $registry->loadString($this->_item->links);
+                $this->_item->links = $registry->toArray();
+                
+                foreach ($this->_item->links as &$link) {
+                    $link = JUri::root().$link;
+                }
             } elseif ($error = $table->getError()) {
                 $this->setError($error);
             }
