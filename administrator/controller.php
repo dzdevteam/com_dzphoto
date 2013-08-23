@@ -26,7 +26,7 @@ class DzphotoController extends JControllerLegacy
     {
         require_once JPATH_COMPONENT.'/helpers/dzphoto.php';
 
-        $view       = JFactory::getApplication()->input->getCmd('view', 'images');
+        $view       = JFactory::getApplication()->input->getCmd('view', 'upload');
         JFactory::getApplication()->input->set('view', $view);
 
         parent::display($cachable, $urlparams);
