@@ -49,7 +49,7 @@ class DzphotoModelAlbum extends JModelList {
      *
      * Note. Calling getState in this method will result in recursion.
      */
-    protected function populateState($ordering = null, $direction = null) {
+    protected function populateState($ordering = 'a.created', $direction = 'DESC') {
         // Initialise variables.
         $app = JFactory::getApplication('administrator');
 
@@ -71,7 +71,7 @@ class DzphotoModelAlbum extends JModelList {
         $this->setState('params', $params);
 
         // List state information.
-        parent::populateState('a.id', 'asc');
+        parent::populateState($ordering, $direction);
     }
 
     /**

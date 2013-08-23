@@ -69,7 +69,7 @@ class DzphotoModelimages extends JModelList {
         $this->setState('params', $params);
 
         // List state information.
-        parent::populateState('a.id', 'asc');
+        parent::populateState('a.created', 'DESC');
     }
 
     /**
@@ -148,8 +148,8 @@ class DzphotoModelimages extends JModelList {
 
 
         // Add the list ordering clause.
-        $orderCol = $this->state->get('list.ordering');
-        $orderDirn = $this->state->get('list.direction');
+        $orderCol = $this->state->get('list.ordering', 'a.created');
+        $orderDirn = $this->state->get('list.direction', 'DESC');
         if ($orderCol && $orderDirn) {
             $query->order($db->escape($orderCol . ' ' . $orderDirn));
         }
