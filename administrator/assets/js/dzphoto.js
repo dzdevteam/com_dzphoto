@@ -241,8 +241,8 @@ jQuery(document).ready(function() {
             mode   = jQuery(this).data('album-mode'),
             src    = 'index.php?option=com_dzphoto&view=album&id=' + jQuery(this).data('album-id') + '&tmpl=component',
             $head_btns = jQuery('<div class="btn-group pull-right" data-toggle="buttons-radio">' +
-            '<button type="button" class="btn btn-mode-view" data-href="'+src+'&mode=view">'+Joomla.JText._('COM_DZPHOTO_ALBUMS_VIEW_IMAGES')+'</button>' +
-            '<button type="button" class="btn btn-mode-add" data-href="'+src+'&mode=add">'+Joomla.JText._('COM_DZPHOTO_ALBUMS_ADD_IMAGES')+'</button>' +
+            '<button type="button" class="btn btn-mode-view" data-href="'+src+'&mode=view"><span class="icon-eye" aria-hidden="true"></span>&nbsp;'+Joomla.JText._('COM_DZPHOTO_ALBUMS_VIEW_IMAGES')+'</button>' +
+            '<button type="button" class="btn btn-mode-add" data-href="'+src+'&mode=add"><span class="icon-file-add" aria-hidden="true"></span>&nbsp;'+Joomla.JText._('COM_DZPHOTO_ALBUMS_ADD_IMAGES')+'</button>' +
                         '</div>');           
         jQuery("div.modal-header", $modal).html(title).append($head_btns).append('<div class="clearfix"></div>');
         jQuery("button.btn-mode-"+mode, $head_btns).addClass('active');

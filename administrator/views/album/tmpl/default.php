@@ -84,7 +84,7 @@ if (!empty($this->extra_sidebar)) {
                 <label for="limit" class="element-invisible"><?php echo JText::_('JFIELD_PLG_SEARCH_SEARCHLIMIT_DESC');?></label>
                 <?php echo $this->pagination->getLimitBox(); ?>
             </div>
-            <div class="btn-group pull-right hidden-phone">
+            <div class="btn-group pull-right">
                 <label for="directionTable" class="element-invisible"><?php echo JText::_('JFIELD_ORDERING_DESC');?></label>
                 <select name="directionTable" id="directionTable" class="input-medium" onchange="Joomla.orderTable()">
                     <option value=""><?php echo JText::_('JFIELD_ORDERING_DESC');?></option>

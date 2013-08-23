@@ -221,7 +221,7 @@ $sortFields = $this->getSortFields();
                                 data-album-title="<?php echo $this->escape($item->title); ?>" 
                                 data-album-id="<?php echo (int) $item->id; ?>"
                                 data-album-mode="view">
-                                <?php echo JText::_('COM_DZPHOTO_ALBUMS_VIEW_IMAGES'); ?>
+                                <span class="icon-eye" aria-hidden="true"></span>&nbsp;<?php echo JText::_('COM_DZPHOTO_ALBUMS_VIEW_IMAGES'); ?>
                             </a>
                             <a 
                                 class="btn btn-link album-modal hasTooltip" href="#" 
@@ -229,7 +229,7 @@ $sortFields = $this->getSortFields();
                                 data-album-title="<?php echo $this->escape($item->title); ?>" 
                                 data-album-id="<?php echo (int) $item->id; ?>"
                                 data-album-mode="add">
-                                <?php echo JText::_('COM_DZPHOTO_ALBUMS_ADD_IMAGES'); ?>
+                                <span class="icon-file-add" aria-hidden="true"></span>&nbsp;<?php echo JText::_('COM_DZPHOTO_ALBUMS_ADD_IMAGES'); ?>
                             </a>
                         </td>
                         <td class="small hidden-phone">
@@ -291,9 +291,10 @@ $sortFields = $this->getSortFields();
     min-height: 400px;
 }
 .modal .modal-header .btn:active, .modal .modal-header .btn.active{
-    background-color: #15497c;
+    background-color: #51a351;
     color: rgba(255,255,255,0.95);
     text-shadow: 0 -1px 0 rgba(0,0,0,0.25);
+    font-weight: bold;
 }
 .modal {
     width: 60% !important;

@@ -274,7 +274,12 @@ if (!empty($this->extra_sidebar)) {
                     <?php foreach($item->tags->itemTags as $tag) { $tags[$tag->id] = $tag->title; } ?>
                     <?php echo join(', ', $tags); ?>
                     <br />
-                    <a href="#" class="tags-modal" data-item-id="<?php echo $item->id; ?>" data-item-tags='<?php echo json_encode($tags, JSON_FORCE_OBJECT); ?>' data-item-title="<?php echo $item->title; ?>"><?php echo JText::_('COM_DZPHOTO_IMAGES_EDIT_TAGS'); ?></a>
+                    <a href="#" class="tags-modal" 
+                        data-item-id="<?php echo $item->id; ?>" 
+                        data-item-tags='<?php echo json_encode($tags, JSON_FORCE_OBJECT); ?>' 
+                        data-item-title="<?php echo $item->title; ?>">
+                        <span class="icon-pencil" aria-hidden="true"></span>&nbsp;<?php echo JText::_('COM_DZPHOTO_IMAGES_EDIT_TAGS'); ?>
+                    </a>
                 </td>
                 <td class="center">
                     <a href="<?php echo JURI::root().$item->links['original']; ?>" target="_nblank" class="btn btn-link">
