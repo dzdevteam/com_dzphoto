@@ -22,10 +22,10 @@ class DZPhotoControllerUpload extends JControllerLegacy
 
     function __construct() {
         parent::__construct();
+        header('Content-Type: application/json');
     }
 
     public function upload() {
-        header('Content-Type: application/json');
         JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
         
         $file = $this->input->files->get('file', '', 'array');
@@ -71,6 +71,7 @@ class DZPhotoControllerUpload extends JControllerLegacy
                 array(
                     'id' => 0, 
                     'title' => pathinfo($links['original'], PATHINFO_BASENAME),
+                    'alias' => pathinfo($file['name'], PATHINFO_FILENAME),
                     'links' => $links,
                     'album' => $album
                 )
@@ -84,7 +85,6 @@ class DZPhotoControllerUpload extends JControllerLegacy
     }
     
     public function newalbum() {
-        header('Content-Type: application/json');
         JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
         
         $newname = $this->input->get('newalbum', '');

@@ -67,6 +67,7 @@ class DZPhotoControllerUpload extends JControllerLegacy
                 array(
                     'id' => 0, 
                     'title' => pathinfo($links['original'], PATHINFO_BASENAME),
+                    'alias' => pathinfo($file['name'], PATHINFO_FILENAME),
                     'links' => $links
                 )
             );
