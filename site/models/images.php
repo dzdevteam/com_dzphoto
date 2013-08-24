@@ -10,6 +10,8 @@
 defined('_JEXEC') or die;
 
 jimport('joomla.application.component.modellist');
+require_once JPATH_SITE.'/components/com_dzphoto/helpers/route.php';
+
 
 /**
  * Methods supporting a list of Dzphoto records.
@@ -160,7 +162,19 @@ class DzphotoModelImages extends JModelList {
     }
 
     public function getItems() {
-        return parent::getItems();
+        $items = parent::getItems();
+        
+        foreach ($items as &$item) {
+            // Convert links string to array of links
+            $registry = new JRegistry();
+            $registry->loadString($item->links);
+            $item->links = $registry->toArray();
+            
+            // Pre-build link for item
+            $item->link = DZPhotoHelperRoute::getImageRoute($item->id);
+        }
+        
+        return $items;
     }
 
 }

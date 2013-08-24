@@ -28,7 +28,7 @@ defined('_JEXEC') or die;
                         $show = true;
                         ?>
                             <li>
-                                <a href="<?php echo JRoute::_('index.php?option=com_dzphoto&view=image&id=' . (int)$item->id); ?>"><?php echo $item->title; ?></a>
+                                <a href="<?php echo $item->link ?>"><?php echo $item->title; ?></a>
                             </li>
                         <?php endif; ?>
 
