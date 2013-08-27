@@ -151,10 +151,73 @@ jQuery(document).ready(function() {
     
     // Utilize bootstrap modal to preview images
     var img_modal_handler = function() {
-        var $img = jQuery("<img src='" + jQuery(this).attr('href') + "' />"),
-            $modal = jQuery("#item-modal");
-        jQuery("div.modal-header", $modal).hide();
-        jQuery("div.modal-body", $modal).html($img);
+        var largesrc = jQuery(this).attr('href'),
+            originalsrc = jQuery(this).data('original'),
+            $modal = jQuery("#item-modal"),
+            $viewbtn = jQuery('<button type="button" class="btn btn-mode-view active"><span class="icon-eye" aria-hidden="true"></span>&nbsp;View</button>').data('src', largesrc),
+            $editbtn = jQuery('<button type="button" class="btn btn-mode-edit"><span class="icon-brush" aria-hidden="true"></span>&nbsp;Edit</button>').data('src', originalsrc),
+            $cropbtn = jQuery('<button type="button" class="btn btn-crop btn-danger"><span class="icon-contract-2" aria-hidden="true"></span>&nbsp;Crop</button>').data('image-id', jQuery(this).data('image-id')).hide(),
+            $btngroup = jQuery('<div class="btn-group pull-right" data-toggle="buttons-radio"></div>'),
+            $viewimg = jQuery("<img />").attr('src', largesrc),
+            $editimg = jQuery("<img />").attr('src', originalsrc),
+            jcrop   = null;
+        
+        var view_btn_handler = function() {
+            jQuery("div.modal-body", $modal).html($viewimg);
+            $cropbtn.hide();
+        }
+        $viewbtn.on('click', view_btn_handler);
+        
+        var edit_btn_handler = function() {
+            jQuery("div.modal-body", $modal).html($editimg);
+            $editimg.Jcrop({}, function(){ jcrop = this });
+            $cropbtn.show();
+        }
+        $editbtn.on('click', edit_btn_handler);
+        
+        var crop_btn_handler = function() {
+            var widgetsize = jcrop.getWidgetSize(),
+                imagesize  = [$editimg[0].width, $editimg[0].height],
+                widthratio = imagesize[0] / widgetsize[0],
+                heightratio = imagesize[1] / widgetsize[1],
+                selection = jcrop.tellSelect();
+            // Scale the selection to the original image size
+            selection.x = Math.round(selection.x * widthratio);
+            selection.x2 = Math.round(selection.x2 * widthratio);
+            selection.w = selection.x2 - selection.x;
+            
+            selection.y = Math.round(selection.y * heightratio);
+            selection.y2 = Math.round(selection.y2 * heightratio);
+            selection.h = selection.y2 - selection.y;
+            
+            // Add image id to the selection
+            selection.id = jQuery(this).data('image-id');
+            
+            if (selection.h != 0 && selection.w != 0) {
+                // Prepare data
+                var data = { selection: selection };
+                jQuery.ajax({
+                    url: 'index.php?option=com_dzphoto&task=images.cropImageAjax&format=json',
+                    data: data,
+                    type: 'POST'
+                }).done(function(response) {
+                    console.log(response);
+                    jcrop.destroy();
+                    $editimg.attr('src', originalsrc + '?' + (new Date()).getTime())
+                            .on('load', function() {
+                                $editimg.Jcrop({}, function(){ jcrop = this });
+                            });
+                    $viewimg.attr('src', response.links.large + '?' + ((new Date)).getTime());
+                }).error(function(jqXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                });
+            }
+        }
+        $cropbtn.on('click', crop_btn_handler);
+        
+        jQuery("div.modal-header", $modal).html($btngroup.append($viewbtn).append($editbtn)).append('<div class="clearfix"></div>');
+        jQuery("div.modal-body", $modal).html($viewimg);
+        jQuery("div.modal-footer", $modal).append($cropbtn);
         jQuery("button.submit-btn", $modal).hide();
         $modal.modal('show');
         
@@ -200,25 +263,25 @@ jQuery(document).ready(function() {
             jQuery.ajax({
                 type: 'POST',
                 url: jQuery("form#tags_form").attr('action'),
-                        data: jQuery("form#tags_form").serialize(),
-                        success: function(response) {
-                            // Update current row
-                            var item_id = jQuery(a).data('item-id');
-                            jQuery("tr#row-item-" + item_id).load('index.php?option=com_dzphoto&view=images #row-item-' + item_id + ' > * ', null, function() {
-                                displayAlert(response.message, 'alert-success');
-                                
-                                // Rebind event for newly fetched element
-                                jQuery('a.img-modal', this).on('click', img_modal_handler);
-                                jQuery('a.tags-modal', this).on('click', tags_modal_handler);
-                                jQuery('td[contenteditable]', this)
-                                .on('focus', td_focus_handler)
-                                .on('keypress', td_keypress_handler)
-                                .on('blur', td_blur_handler);
-                            });
-                        },
-                        error: function(jqXHR, textStatus, errorThrown) {
-                            displayAlert(errorThrown, 'alert-danger');
-                        }
+                data: jQuery("form#tags_form").serialize(),
+                success: function(response) {
+                    // Update current row
+                    var item_id = jQuery(a).data('item-id');
+                    jQuery("tr#row-item-" + item_id).load('index.php?option=com_dzphoto&view=images #row-item-' + item_id + ' > * ', null, function() {
+                        displayAlert(response.message, 'alert-success');
+                        
+                        // Rebind event for newly fetched element
+                        jQuery('a.img-modal', this).on('click', img_modal_handler);
+                        jQuery('a.tags-modal', this).on('click', tags_modal_handler);
+                        jQuery('td[contenteditable]', this)
+                        .on('focus', td_focus_handler)
+                        .on('keypress', td_keypress_handler)
+                        .on('blur', td_blur_handler);
+                    });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    displayAlert(errorThrown, 'alert-danger');
+                }
             });
             
             // Close the modal

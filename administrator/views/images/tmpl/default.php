@@ -86,6 +86,8 @@ JFactory::getDocument()->addScriptDeclaration("
 );
 // Import CSS
 $document = JFactory::getDocument();
+$document->addStyleSheet('components/com_dzphoto/assets/css/jquery.Jcrop.min.css');
+$document->addScript('components/com_dzphoto/assets/js/jquery.Jcrop.min.js');
 $document->addStyleSheet('components/com_dzphoto/assets/css/dzphoto.css');
 $document->addScript('components/com_dzphoto/assets/js/dzphoto.js');
 
@@ -265,7 +267,12 @@ if (!empty($this->extra_sidebar)) {
                     <?php echo $item->caption; ?>
                 </td>
                 <td>
-                    <a href="<?php echo JUri::root().$item->links['large']; ?>" title="<?php echo JText::_('COM_DZPHOTO_IMAGES_LARGE_SIZE'); ?>" class="img-modal">
+                    <a 
+                        href="<?php echo JUri::root().$item->links['large']; ?>" 
+                        title="<?php echo JText::_('COM_DZPHOTO_IMAGES_LARGE_SIZE'); ?>" 
+                        data-original="<?php echo JUri::root().$item->links['original']; ?>"
+                        data-image-id="<?php echo $item->id; ?>"
+                        class="img-modal">
                         <img src="<?php echo JUri::root().$item->links['thumb']; ?>" title="<?php echo $item->title; ?>" alt="<?php echo $item->title; ?>" />
                     </a>
                 </td>

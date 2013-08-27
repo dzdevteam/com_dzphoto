@@ -188,6 +188,49 @@ class DZPhotoHelper
     }
     
     /**
+     * Crop image helper
+     * 
+     * @param int $id The image item id
+     * @param int $width
+     * @param int $height
+     * @param int $left
+     * @param int $top
+     *
+     * @return string[] array of new links
+     */
+    public static function cropImage($id, $width, $height, $left, $top)
+    {
+        // Prepare model and data
+        $model = JModelLegacy::getInstance('Image', 'DZPhotoModel');
+        
+        // Get the item
+        $item = $model->getItem($id);
+        
+        if (empty($item))
+            throw new InvalidArgumentException(JText::_('COM_DZPHOTO_ERROR_INVALID_IMAGE_ID'));
+        
+        $originalfile = JPATH_ROOT.'/'.$item->links['original'];
+        $info = JImage::getImageFileProperties($originalfile);            
+        
+        // Crop then save the image
+        $image = new JImage($originalfile);
+        $image->crop($width, $height, $left, $top, false);
+        $image->toFile($originalfile, $info->type);
+        
+        // Regenerate the thumbnails
+        $links = self::generateThumbs($originalfile);
+        $links['original'] = $item->links['original'];
+        
+        // Update item links
+        DZPhotoHelper::updateImageItem(array(
+            'id' => $id,
+            'links' => $links
+        ));
+        
+        return $links;
+    }
+    
+    /**
      * Return error and response code then exit application
      *
      * @param string $error Error message
@@ -200,7 +243,7 @@ class DZPhotoHelper
         if (JFactory::getApplication()->input->get('format', '') == 'json') {
             header($_SERVER['SERVER_PROTOCOL'] . " $status_code " . $error, true, $status_code);
             header('Content-Type: application/json');
-            echo json_encode(array('message' => $error));
+            echo json_encode(array('status' => 'nok', 'message' => $error));
             jexit();
         } else {
             throw new Exception($error, $status_code);
