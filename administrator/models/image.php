@@ -11,6 +11,7 @@
 defined('_JEXEC') or die;
 
 jimport('joomla.application.component.modeladmin');
+jimport('joomla.filesystem.file');
 
 /**
  * Dzphoto model.
@@ -92,6 +93,10 @@ class DZPhotoModelImage extends JModelAdmin
         if ($item = parent::getItem($pk)) {
 
             //Do any procesing on fields here if needed
+            $registry = new JRegistry();
+            $registry->loadString($item->links);
+            $item->links = $registry->toArray();
+            
             if (!empty($item->id))
             {
                 $item->tags = new JHelperTags;
@@ -166,8 +171,6 @@ class DZPhotoModelImage extends JModelAdmin
                     $links = new JRegistry();
                     $links->loadString($table->links);
                     $links = $links->toArray();
-                    $directory = pathinfo($links['original'], PATHINFO_DIRNAME);
-                    $filename = pathinfo($links['original'], PATHINFO_FILENAME);
                     
                     // Get the id
                     $id = $table->id;
@@ -180,11 +183,15 @@ class DZPhotoModelImage extends JModelAdmin
                     }
                     
                     // Image item delete successfully, thus we also delete the images from the system
-                    $images_paths = glob(JPATH_ROOT.'/'.$directory.'/'.$filename.'*');
-                    
-                    if (!empty($images_paths)) {
-                        foreach ($images_paths as $image_path) {
-                            unlink($image_path); // Don't really care if it return false or not
+                    if (JFile::exists(JPATH_ROOT.'/'.$links['original'])) {
+                        $directory = pathinfo($links['original'], PATHINFO_DIRNAME);
+                        $filename = pathinfo($links['original'], PATHINFO_FILENAME);
+                        $images_paths = glob(JPATH_ROOT.'/'.$directory.'/'.$filename.'*');
+                        
+                        if (!empty($images_paths)) {
+                            foreach ($images_paths as $image_path) {
+                                JFile::delete($image_path); // Don't really care if it return false or not
+                            }
                         }
                     }
                     
