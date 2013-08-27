@@ -17,6 +17,7 @@ JHtml::_('behavior.multiselect');
 JHtml::_('formbehavior.chosen', 'select');
 JFactory::getDocument()->addScript(JUri::root().'administrator/components/com_dzphoto/assets/js/dzphoto.js');
 JFactory::getDocument()->addScript(JUri::root().'administrator/components/com_dzphoto/assets/js/jquery.iframe-auto-height.plugin.1.9.3.min.js');
+JFactory::getDocument()->addStyleSheet('components/com_dzphoto/assets/css/dzphoto.css');
 
 // Put some string into JText
 JText::script("COM_DZPHOTO_ALBUMS_VIEW_IMAGES");

@@ -45,7 +45,7 @@ class DZPhotoControllerAlbum extends JControllerLegacy
         try {
             $result = $db->execute();
         } catch (Exception $e) {
-            DZPhotoHelper::exitWithError($e->getMessage(), 500);
+            DZPhotoHelper::catchException($e);
         }
         
         echo json_encode(array('status' => 'ok', 'message' => JText::_('COM_DZPHOTO_REMOVE_SUCCESS')));
@@ -68,7 +68,7 @@ class DZPhotoControllerAlbum extends JControllerLegacy
         try {
             $db->insertObject('#__dzphoto_relations', $relation);
         } catch(Exception $e) {
-            DZPhotoHelper::exitWithError($e->getMessage(), 500);
+            DZPhotoHelper::catchException($e);
         }
         
         echo json_encode(array('status' => 'ok', 'message' => JText::_('COM_DZPHOTO_ADD_SUCCESS')));

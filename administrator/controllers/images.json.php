@@ -29,12 +29,17 @@ class DzphotoControllerImages extends JControllerAdmin
      */
     public function saveImageAjax()
     {
-        JSession::checkToken('request') or DZPhotoHelper::exitWithError(JText::_('JINVALID_TOKEN'));
+        JSession::checkToken('request') or jexit(json_encode(array('status' => 'nok', 'message' => JText::_('JINVALID_TOKEN'))));
         
         // Get the input
         $data = $this->input->post->get('jform', array(), 'array');
         
-        DZPhotoHelper::updateImageItem($data);
+        try {
+            DZPhotoHelper::updateImageItem($data);
+        } catch (Exception $e) {
+            DZPhotoHelper::catchException($e);
+        }
+        
         echo json_encode(array('status' => 'ok', 'message' => JText::_('COM_DZPHOTO_SAVE_SUCCESS')));
         jexit();
     }
@@ -46,13 +51,15 @@ class DzphotoControllerImages extends JControllerAdmin
      */
     public function cropImageAjax()
     {
+        JSession::checkToken('request') or jexit(json_encode(array('status' => 'nok', 'message' => JText::_('JINVALID_TOKEN'))));
+        
         // Get the selection
         $selection = $this->input->post->get('selection', array(), 'array');
         
         try {
             $newlinks = DZPhotoHelper::cropImage($selection['id'], $selection['w'], $selection['h'], $selection['x'], $selection['y']);
         } catch (Exception $e) {
-            DZPhotoHelper::exitWithError($e->getMessage());
+            DZPhotoHelper::catchException($e);
         }
         
         foreach ($newlinks as &$link) {

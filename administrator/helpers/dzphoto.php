@@ -109,6 +109,8 @@ class DZPhotoHelper
      * @param array $data Contain image data (id, title, caption, links)
      *
      * @return void
+     *
+     * @throw RuntimeException
      */
     public static function updateImageItem($data)
     {        
@@ -117,12 +119,12 @@ class DZPhotoHelper
         
         $user = JFactory::getUser();
         if (!$user->authorise('core.create', 'com_dzphoto.image')) {
-            DZPhotoHelper::exitWithError(JText::_('JLIB_APPLICATION_ERROR_SAVE_NOT_PERMITTED'), 500);
+            throw new RuntimeException(JText::_('JLIB_APPLICATION_ERROR_SAVE_NOT_PERMITTED'));
         }
         
         $form = $model->getForm($data, false);
         if (!$form) {
-            DZPhotoHelper::exitWithError($model->getError(), 500);
+            throw new RuntimeException($model->getError());
         };
         
         $validData = $model->validate($form, $data);
@@ -144,7 +146,7 @@ class DZPhotoHelper
                 }
             }
             
-            DZPhotoHelper::exitWithError(join(',', $messages), 500);
+            throw new RuntimeException(join(',', $messages));
         }
         
         if (!isset($validData['tags']))
@@ -157,9 +159,8 @@ class DZPhotoHelper
             }
         }
         // Attempt to save data
-        if (!$model->save($validData))
-        {
-            DZPhotoHelper::exitWithError(JText::sprintf('JLIB_APPLICATION_ERROR_SAVE_FAILED', $model->getError()), 500);
+        if (!$model->save($validData)) {
+            throw new RuntimeException(JText::sprintf('JLIB_APPLICATION_ERROR_SAVE_FAILED', $model->getError()));
         }
         
         // Create relation between images and album
@@ -177,12 +178,7 @@ class DZPhotoHelper
                 $relation = new stdClass();
                 $relation->catid = $data['album'];
                 $relation->imageid = $model->getState('image.id');
-                try {
-                    $db->insertObject('#__dzphoto_relations', $relation);
-                } catch(Exception $e) {
-                    DZPhotoHelper::exitWithError($e->getMessage(), 500);
-                }
-                
+                $db->insertObject('#__dzphoto_relations', $relation);                
             }
         }
     }
@@ -197,6 +193,8 @@ class DZPhotoHelper
      * @param int $top
      *
      * @return string[] array of new links
+     *
+     * @throw InvalidArgumentException
      */
     public static function cropImage($id, $width, $height, $left, $top)
     {
@@ -249,4 +247,24 @@ class DZPhotoHelper
             throw new Exception($error, $status_code);
         }
     }
+    
+    /**
+     * Entry point for throwing exception and exit
+     *
+     * @param Exception $e The exception to be rethrown or display
+     * @param int $status_code HTTP status code (optional)
+     *
+     * @return void
+     */
+     public static function catchException($e, $status_code = 500) {
+        // If the client request json output, we throw a JSON object out
+        if (JFactory::getApplication()->input->get('format', '') == 'json') {
+            header($_SERVER['SERVER_PROTOCOL'] . " $status_code " . $e->getMessage(), true, $status_code);
+            header('Content-Type: application/json');
+            echo json_encode(array('status' => 'nok', 'message' => $e->getMessage()));
+            jexit();
+        } else {
+            throw $e;
+        }
+     }
 }

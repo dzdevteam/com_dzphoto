@@ -32,7 +32,7 @@ $document->addScript('components/com_dzphoto/assets/js/dzphoto.js');
 <?php endif;?>
     <?php echo JHtml::_('bootstrap.startAccordion', 'upload-arcordion', array('parent' => true, 'active' => 'new-album')); ?>
         <?php echo JHtml::_('bootstrap.addSlide', 'upload-arcordion', JText::_('COM_DZPHOTO_UPLOAD_NEW_ALBUM'), 'new-album'); ?>
-        <form id="album-form" class="form-horizontal">
+        <form id="album-form" class="form-horizontal" action="index.php?option=com_dzphoto&amp;task=upload.newalbum&amp;format=json">
             <div class="control-group">
                 <?php echo $this->form->getLabel('newalbum'); ?>
                 <div class="controls">
@@ -53,8 +53,7 @@ $document->addScript('components/com_dzphoto/assets/js/dzphoto.js');
         <?php echo JHtml::_('bootstrap.addSlide', 'upload-arcordion', JText::_('COM_DZPHOTO_UPLOAD_ADD_IMAGES'), 'add-images'); ?>
         <form action="<?php echo JRoute::_('index.php?option=com_dzphoto&view=upload&task=upload.upload'); ?>" method="post" id="adminForm" enctype="multipart/form-data" class="dropzone dz-clickable">
             <div class="fallback">
-                <input type="file" name="file" accept="image/*" />
-                <input type="submit" class="btn" value="<?php echo JText::_('JSUBMIT'); ?>" />
+                <?php echo JText::_('COM_DZPHOTO_UPLOAD_ERROR_BROWSER_NOT_SUPPORTED'); ?>
             </div>
             <input id="albumid" type="hidden" name="album" value="" />
             <?php echo JHtml::_( 'form.token' ); ?>

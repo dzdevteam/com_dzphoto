@@ -188,7 +188,7 @@ if (!empty($this->extra_sidebar)) {
                 <?php echo JText::_('COM_DZPHOTO_IMAGES_CAPTION'); ?>
                 </th>
                 <th class='center' width="15%">
-                <?php echo JText::_('COM_DZPHOTO_IMAGES_PREVIEW'); ?>
+                <?php echo JText::_('COM_DZPHOTO_IMAGES_PREVIEW_EDIT'); ?>
                 </th>
                 <th class='left'>
                 <?php echo JText::_('COM_DZPHOTO_IMAGES_TAGS'); ?>
@@ -339,7 +339,7 @@ if (!empty($this->extra_sidebar)) {
 </div>
 <div id="hidden-area" style="display:none">
     <div class="tags-container">
-        <form id="tags_form" action="index.php?option=com_dzphoto&amp;task=images.saveImageAjax" method="POST">
+        <form id="tags_form" action="index.php?option=com_dzphoto&amp;task=images.saveImageAjax&amp;format=json" method="POST">
             <input id="jform_id" type="hidden" name="jform[id]" />
             <select id="jform_tags" name="jform[tags][]" multiple="true">
             </select>

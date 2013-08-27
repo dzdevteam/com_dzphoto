@@ -56,18 +56,25 @@ jQuery(document).ready(function() {
         // Loading animation
         jQuery('#alert-area').html('<img src="../media/system/images/modal/spinner.gif" />');
         
-        var $form = jQuery('form#album-form');
+        var data = { newalbum: jQuery('input[name="newalbum"]').val() },
+            token = jQuery('input[type="hidden"][value="1"]').attr('name'),
+            $form = jQuery('#album-form');
+        data[token] = 1;
+            
         jQuery.ajax({
             type: 'POST',
             url: 'index.php?option=com_dzphoto&task=upload.newalbum&format=json',
-            data: $form.serialize(),
+            data: data,
             success: function(response) {
                 $form.load('index.php?option=com_dzphoto&view=upload #album-form > *', null, function() {
                     displayAlert(response.message, 'alert-success');
                     
                     // Rebind event
                     jQuery('button#newalbum-submit', $form).on('click', album_submit_handler);
-                    jQuery('select[name="albums"])', $form).on('change', albums_select_handler);
+                    jQuery('select[name="albums"]', $form).chosen({
+                        disable_search_threshold : 10,
+                        allow_single_deselect : true
+                    });
                 });
             },
             error: function(jqXHR, textStatus, errorThrown) {
@@ -134,7 +141,7 @@ jQuery(document).ready(function() {
         
         // Send data
         jQuery.ajax({
-            url: 'index.php?option=com_dzphoto&task=images.saveImageAjax',
+            url: 'index.php?option=com_dzphoto&task=images.saveImageAjax&format=json',
             type: 'POST',
             data: data
         }).done(function(response) {
@@ -180,7 +187,9 @@ jQuery(document).ready(function() {
                 imagesize  = [$editimg[0].width, $editimg[0].height],
                 widthratio = imagesize[0] / widgetsize[0],
                 heightratio = imagesize[1] / widgetsize[1],
-                selection = jcrop.tellSelect();
+                selection = jcrop.tellSelect(),
+                token = jQuery('input[type="hidden"][value="1"]').attr('name');
+                
             // Scale the selection to the original image size
             selection.x = Math.round(selection.x * widthratio);
             selection.x2 = Math.round(selection.x2 * widthratio);
@@ -196,6 +205,8 @@ jQuery(document).ready(function() {
             if (selection.h != 0 && selection.w != 0) {
                 // Prepare data
                 var data = { selection: selection };
+                data[token] = 1;
+                
                 jQuery.ajax({
                     url: 'index.php?option=com_dzphoto&task=images.cropImageAjax&format=json',
                     data: data,
