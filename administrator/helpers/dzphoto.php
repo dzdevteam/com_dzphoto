@@ -165,6 +165,7 @@ class DZPhotoHelper
         
         // Create relation between images and album
         if (isset($data['album']) && (int) $data['album']) {
+            JTable::addIncludePath(JPATH_ADMINISTRATOR.'/components/com_dzphoto/tables');
             $table = JTable::getInstance('Relation', 'DZPhotoTable');
             
             // Check for already established relation

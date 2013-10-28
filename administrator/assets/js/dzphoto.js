@@ -6,7 +6,6 @@ if (typeof Dropzone !== 'undefined') {
         dictRemoveFile: 'Clear',
         init: function() {
             this.on('success', function(file, response) {
-                console.log(response);
                 file.previewElement.querySelector("[data-dz-name]").textContent = response.original.replace(/^.*[\\\/]/, ''); 
             });
             this.on('reset', function() {
